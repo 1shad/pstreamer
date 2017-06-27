@@ -1,0 +1,30 @@
+#!/usr/bin/env perl
+
+=encoding utf8
+
+=head1 NAME
+
+Pstreamer - Regarder des films ou des séries en streaming
+
+=cut
+
+use strict;
+use warnings;
+use utf8::all;
+
+use Pstreamer::App;
+
+Pstreamer::App->new_with_options->run;
+
+=head1 SYNOPSIS
+ 
+ Voir:
+    aide courte: pstreamer -h
+    aide longue: perldoc Pstreamer::App
+
+=head1 SEE ALSO
+
+ L<https://github.com/1shad/pstreamer>
+ L<Pstreamer::App>
+
+=cut
