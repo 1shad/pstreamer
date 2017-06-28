@@ -85,17 +85,22 @@ sub _get_results {
 }
 
 sub bypass {
-    my $self = shift;
+    my ( $self, $verbose ) = @_;
     my $url = $self->tx->req->url;
     my @results = $self->_get_results;
     my $t = 4;
     
+    # verbose by default
+    # use ->bypass(0) for non verbose.
+    $verbose //= 1;
+    
     $|++;
     while ( $t > 0 ){
-        print "Déblockage cloudflare: ".$t--."s\r";
+        print "Déblockage cloudflare: ".$t."s\r" if $verbose;
         sleep(1);
+        $t--;
     }
-    print ' 'x27 ."\r";
+    print ' 'x27 ."\r" if $verbose;
     $|--;
         
     my $headers = { 'Referer' => $url->to_string };
