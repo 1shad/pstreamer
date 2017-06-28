@@ -35,16 +35,18 @@ has config_file => ( is => 'ro', default => sub {
     File::Spec->catfile( $CONFIG_DIR, 'config' );
 });
 
-has fullscreen => ( is => 'rw' );
+has [qw(cookie fullscreen)] => ( is => 'rw' );
 
 sub _build_ua {
     my $self = shift;
 
     my $ua = Mojo::UserAgent->new;
     $ua->transactor->name( $self->user_agent );
+    
     $ua = $ua->cookie_jar(
         Pstreamer::Util::CookieJarFile->new( cookie_file => $self->cookie_file )
-    );
+    ) if $self->cookie;
+    
     $ua->on( start => sub {
         my ( $ua, $tx ) = @_;
         $tx->req->headers->header( Accept => $self->header_accept );
