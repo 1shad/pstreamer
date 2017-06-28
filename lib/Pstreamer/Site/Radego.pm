@@ -17,7 +17,7 @@ has url => (
 );
 
 has menu => ( is => 'ro', default => sub{ {
-    'Accueil'       => '/',
+    'Accueil'       => '/cxcxds0iklm454vc54bfd87gdfs8/',
     'A l\'affiche'  => '/cxcxds0iklm454vc54bfd87gdfs8/index.php?option=com_content&view=category&id=29&Itemid=7',
     'Animation'     => '/cxcxds0iklm454vc54bfd87gdfs8/index.php?option=com_content&view=category&id=2&Itemid=2',
     'Documentaires' => '/cxcxds0iklm454vc54bfd87gdfs8/index.php?option=com_content&view=category&id=26&Itemid=4',
