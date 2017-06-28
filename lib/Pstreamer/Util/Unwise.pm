@@ -8,7 +8,8 @@ package Pstreamer::Util::Unwise;
 
  use Pstreamer::Util::Unwise 'unwise';
  ...
- my $html = unwise( $html );
+ my $html = ...;
+ $html = unwise( $html );
  ...
 
 =cut

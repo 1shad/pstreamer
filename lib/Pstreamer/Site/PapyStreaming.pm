@@ -6,19 +6,20 @@ package Pstreamer::Site::PapyStreaming;
 
 =cut
 
+use utf8;
 use Mojo::JSON 'decode_json';
 use Mojo::Util 'trim';
 use Mojo::URL;
 use Moo;
 
-has url => ( is => 'ro', default => 'http://papystreaming.org/' );
+has url => ( is => 'ro', default => 'http://papy-streaming.org/' );
 
 has menu => ( is => 'ro', default => sub{ {
     'Accueil'          => '/',
-    'Film Streaming'   => '/film-streaming/',
-    'Series Streaming' => '/series-streaming/',
-    'Derniers ajouts'  => '/nouveaux-films/',
-    'Populaire'        => '/populaire/',
+    'Film Streaming'   => '/film-streaming-hd/',
+    'Series Streaming' => '/series-streaming-hd/',
+    'Derniers ajouts'  => '/nouveaux-films-hd/',
+    'Populaire'        => '/populaire-hd/',
     'Les plus vues'    => '/de-visite/',
     'Les mieux notées' => '/de-vote/',
 } } );

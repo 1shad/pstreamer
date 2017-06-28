@@ -265,24 +265,27 @@ sub _get_history {
 
 =head1 DESCRIPTION
 
- pstreamer est un programme en perl qui permet de visionner des films ou
- des series en streaming depuis un terminal. Il fonctionne sous GNU/Linux.
+ Pstreamer permet de visionner des films ou des series,
+ en streaming, depuis un terminal. Il fonctionne sous GNU/Linux.
 
- Il se connecte à certains sites français. Propose de parcourir le site
+ Il se connecte à certains sites français. Perrmet de parcourir le site
  via les liens disponibles ou par son menu, et permet de faire des recherches.
  Les vidéos sont lues depuis les hebergeurs avec mpv.
 
 =head1 UTILISATION
+ 
+ Pour lancer pstreamer, executer:
+ $ pstreamer
 
  Le programme affiche les liens avec des numeros en début de ligne.
  Taper le numero de la ligne pour aller à la page suivante ou alors
  écrire un texte pour lancer une recherche.
 
  Les commandes du prompt disponibles sont:
-  :q pour quitter
   :p pour précédent
   :m pour afficher le menu du site
   :s pour afficher les sites
+  :q pour quitter
 
 =head1 OPTIONS
 
@@ -299,12 +302,12 @@ sub _get_history {
     que vous auriez écrit en lancant le programme.
 
     exemple1: pstreamer  --go=2,'ma série'
-        Ceci permet de sélectionner le 3eme site, puis
+        permet de sélectionner le 3eme site, puis
         de faire une recherche avec le texte 'ma série'.
         pstream affiche les résultats, puis le prompt.
 
     exemple2: pstreamer --fs --go=2,'ma serie',2,1,0,0,:q
-        pstream lance automatiquement l'épisode avec 
+        pstreamer lance automatiquement l'épisode avec 
         mpv en plein ecran. Il quitte juste apres mpv.
 
     exemple3: pstreamer --go=2,'ma serie',2,2,0,0,:p,1,0,:q
@@ -326,7 +329,9 @@ sub _get_history {
 =head1 INSTALLATION
 
  Pour installer pstreamer, exécuter:
-
+    
+    git clone https://github.com/1shad/pstreamer.git
+    cd pstreamer
     perl Makefile.PL
     make
     make install
