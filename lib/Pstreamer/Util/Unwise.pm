@@ -47,7 +47,7 @@ sub unwise {
     return $js;
 }
 
-sub _unwise1{
+sub _unwise1 {
     my ( $js, @wise ) = @_;
     
     my $counter = 0;
@@ -73,7 +73,7 @@ sub _unwise1{
     );
 }
 
-sub _unwise2{
+sub _unwise2 {
     my @str = split '', shift;
     my @res;
 
@@ -84,10 +84,10 @@ sub _unwise2{
     return join '', @res;
 }
 
-sub _process_unwise1{
-    my ($w, $i, $s, $e, $wi, $ii, $si, $ei ) = @_;
-    my ($v1, $v2, $v3, $v4) = (0,0,0,0);
-    my ($str1, $str2) = ([],[]);
+sub _process_unwise1 {
+    my ( $w, $i, $s, $e, $wi, $ii, $si, $ei ) = @_;
+    my ( $v1, $v2, $v3, $v4 ) = (0,0,0,0);
+    my ( $str1, $str2 ) = ([],[]);
     my @result;
 
     while (1) {

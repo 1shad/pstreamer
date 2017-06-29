@@ -16,7 +16,7 @@ has url => (
     default => 'http://radego.com/cxcxds0iklm454vc54bfd87gdfs8/',
 );
 
-has menu => ( is => 'ro', default => sub{ {
+has menu => ( is => 'ro', default => sub { {
     'Accueil'       => '/cxcxds0iklm454vc54bfd87gdfs8/',
     'A l\'affiche'  => '/cxcxds0iklm454vc54bfd87gdfs8/index.php?option=com_content&view=category&id=29&Itemid=7',
     'Animation'     => '/cxcxds0iklm454vc54bfd87gdfs8/index.php?option=com_content&view=category&id=2&Itemid=2',

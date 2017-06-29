@@ -14,7 +14,7 @@ use Moo;
 
 has url => ( is => 'ro', default => 'http://papy-streaming.org/' );
 
-has menu => ( is => 'ro', default => sub{ {
+has menu => ( is => 'ro', default => sub { {
     'Accueil'          => '/',
     'Film Streaming'   => '/film-streaming-hd/',
     'Series Streaming' => '/series-streaming-hd/',
@@ -54,8 +54,6 @@ sub get_results {
     
     return @results;
 }
-
-
 
 sub _get_default_links {
     my ( $self, $dom ) = @_;
@@ -151,7 +149,7 @@ sub _get_papy_player_links {
     my ( $tx, $json ) = ( undef, [] );
 
     $tx = $self->ua->get( $item->{url} );
-	my $headers = { Referer => $item->{url} };
+    my $headers = { Referer => $item->{url} };
     
     if ( my $iframe = $tx->res->dom->at('iframe') ) {
         $tx = $self->ua->head( $iframe->attr('src') => $headers );

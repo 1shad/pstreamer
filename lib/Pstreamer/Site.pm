@@ -82,7 +82,7 @@ sub get_results {
 }
 
 sub params {
-    my ($self, $params) = @_;
+    my ( $self, $params ) = @_;
     return 0 unless defined $self->current;
     return $self->current->params($params);
 }

@@ -18,12 +18,12 @@ sub get_filename {
     return 0 unless $tx->success;
 
     @results = $tx->res->dom->find('source')
-        ->map( sub{ { 
+        ->map( sub { { 
             url    => $_->attr('src'), 
             name   => $_->attr('type'),
             stream => 1
         } } )
-        ->grep( sub{ $_->{url} } )
+        ->grep( sub { $_->{url} } )
         ->each;
 
     return @results?\@results:0;

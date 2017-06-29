@@ -69,8 +69,8 @@ sub _get_host {
 # and returns its value.
 # Returns undef if no host.
 #
-sub get_filename{
-    my ($self, $url) = @_;
+sub get_filename {
+    my ( $self, $url ) = @_;
     my $host = undef ;
 
     $host = $self->_get_host($url);

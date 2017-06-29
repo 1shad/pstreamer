@@ -17,7 +17,7 @@ has config => ( is => 'ro', default => sub {
 });
 
 sub stream {
-    my ($self, $file, $type) = @_;
+    my ( $self, $file, $type ) = @_;
     my ( $headers );
     
     return if ( !$file );
@@ -38,7 +38,7 @@ sub _player {
     };
 
     # gets header fields from head request
-    $tx = $self->ua->head($file => $headers);
+    $tx = $self->ua->head( $file => $headers );
     while ( $tx->result->code == 301 or $tx->result->code == 302 ) {
         # don't go recursive -_-
         last if $file eq $tx->result->headers->header('location');
@@ -74,10 +74,10 @@ sub _player {
     warn "Error while reading the file with mpv" unless $success;
 }
 
-sub _parse_url{
+sub _parse_url {
     my ( $self, $file ) = @_;
-    my ( $headers, @temp ) = (undef, split /\|/, $file);
-    ($file, $headers) = @temp;
+    my ( $headers, @temp ) = ( undef, split( /\|/, $file ) );
+    ( $file, $headers ) = @temp;
     @temp = split /&/, $headers||'';
     $headers = { map { my @t = split /=/, $_; { $t[0] => $t[1] } } @temp };
     return ($file, $headers);

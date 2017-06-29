@@ -19,7 +19,7 @@ sub get_filename {
     return 0 unless $tx->success;
     
     @results = $tx->res->dom->find('source')
-        ->map( sub{ { 
+        ->map( sub { { 
             url => Mojo::URL->new($_->attr('src'))->scheme('http')->to_string,
             name => $_->attr('data-res'),
             stream => 1

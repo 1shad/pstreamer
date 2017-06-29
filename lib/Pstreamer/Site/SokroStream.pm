@@ -13,7 +13,7 @@ use Moo;
 
 has url => ( is => 'ro', default => 'http://sokrostream.cc/' );
 
-has menu => ( is => 'ro', default => sub{ { 
+has menu => ( is => 'ro', default => sub { { 
     'Accueil'                => '/',
     'Films derniers ajouts'  => "/categories/films-streaming",
     'Series derniers ajouts' => "/categories/series-streaming",
@@ -107,9 +107,9 @@ sub _get_links {
     my ( $url, @results );
 
     $url = $dom->at('link[rel="canonical"]')->attr('href');
-	
+    
     @results = $dom->find('form[action="#playfilm"]')
-    	->map('find', 'img,input')
+        ->map('find', 'img,input')
         ->map( sub { [
             trim( $$_[0]->parent->text ),
             $$_[1]->attr('src') =~ s/.*\/(.+)\.png$/uc($1)/er,
@@ -120,7 +120,7 @@ sub _get_links {
             params => $$_[2],
             url    => $url,
         } } )
-    	->each;
+        ->each;
 
     return @results;
 }

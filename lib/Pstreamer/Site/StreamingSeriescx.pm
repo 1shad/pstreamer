@@ -11,7 +11,7 @@ use Moo;
 
 has url => ( is => 'ro', default => 'http://www.streaming-series.cx/' );
 
-has menu => ( is => 'ro', default => sub{ {
+has menu => ( is => 'ro', default => sub { {
     'Accueil'      => '/',
     'Action'       => '/category/action/',
     'Animation'    => '/category/animation/',

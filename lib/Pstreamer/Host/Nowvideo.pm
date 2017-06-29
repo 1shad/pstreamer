@@ -33,21 +33,21 @@ sub get_filename {
     }
 
     @results = $dom->find('source')
-        ->map( sub{ { 
+        ->map( sub { { 
             url  => $_->attr('src'),
             name => $_->attr('type'),
             stream => 1,
         } } )
         ->each;
-	
+    
     return @results?\@results:0;
 }
 
 sub _set_url {
-	my ( $self, $url ) = @_;
+    my ( $self, $url ) = @_;
     ($url) = $url =~ '\/\/(?:www.|embed.)nowvideo.[a-z]{2}\/(?:video\/|embed.+?\?.*?v=)([0-9a-z]+)';
     $url = 'http://embed.nowvideo.sx/embed.php?v='.$url;
-	return $url;
+    return $url;
 }
 
 1;

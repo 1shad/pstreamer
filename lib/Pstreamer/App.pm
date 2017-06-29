@@ -130,21 +130,21 @@ sub _proceed_command {
     my ( $self, $line ) = @_;
     my ( $previous, @choices );
 
-	exit if $line eq ":q";
+    exit if $line eq ":q";
 
-	if ( $line eq ":s" ) {
-		@choices = $self->site->get_sites;
-	}
-	elsif ( $line eq ":m" ) {
+    if ( $line eq ":s" ) {
+        @choices = $self->site->get_sites;
+    }
+    elsif ( $line eq ":m" ) {
         return undef unless $self->site->current;
-		@choices = @{$self->site->menu};
-	}
-	elsif ( $line eq ":p"){
+        @choices = @{$self->site->menu};
+    }
+    elsif ( $line eq ":p"){
         $previous = $self->_get_history;
         return $self->site->current(undef) unless $previous;
         $self->tx( $self->_get($previous) );
-	    @choices = $self->site->get_results($self->tx);
-	}
+        @choices = $self->site->get_results($self->tx);
+    }
     return @choices;
 }
 

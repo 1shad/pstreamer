@@ -11,7 +11,7 @@ use Moo;
 
 has url => ( is => 'ro', default => 'http://ls-streaming.com/' );
 
-has menu => ( is => 'ro', default => sub{ {
+has menu => ( is => 'ro', default => sub { {
     'Accueil'  => '/',
     'Series'   => '/series/',
     'Films'    => '/films/',

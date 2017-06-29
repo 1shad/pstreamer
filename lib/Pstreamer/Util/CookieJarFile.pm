@@ -27,7 +27,7 @@ use Carp 'croak';
 has 'cookie_file';
 
 sub new {
-    my ($proto, %param) = @_;
+    my ( $proto, %param ) = @_;
     my $self = shift->SUPER::new( %param );
     croak 'cookie_file must be specified' unless defined $self->{cookie_file};
     $self->_load_cookies;
@@ -44,7 +44,7 @@ sub _load_cookies {
 }
 
 sub _format_cookie {
-    my ($self, $cookie) = @_;
+    my ( $self, $cookie ) = @_;
     return undef unless blessed $cookie;
     my $origin = $cookie->origin // $cookie->domain or return "\n";
     
@@ -63,7 +63,7 @@ sub _format_cookie {
 # or returns undef if the cookie has expired
 #
 sub _parse_cookie {
-    my ($self, $text) = @_;
+    my ( $self, $text ) = @_;
     $text //= '';
     return undef unless length $text
         and ( $text !~ /^#/ or $text =~ /^#HttpOnly_/ ) ;
