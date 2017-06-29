@@ -3,6 +3,10 @@ use Test::Mojo;
 use Pstreamer::Site::StreamingSeriescx;
 use Pstreamer::Util::CloudFlare;
 
+unless ( $ENV{PSTREAMER_TESTING} ) {
+    plan( skip_all => "URL tests not required for installation" );
+}
+
 my $t    = Test::Mojo->new;
 my $site = Pstreamer::Site::StreamingSeriescx->new;
 my $cf   = Pstreamer::Util::CloudFlare->new;
