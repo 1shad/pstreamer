@@ -12,13 +12,14 @@ use Moo;
 
 with 'Pstreamer::Role::UA';
 
-sub get_filename{
-    my ($self, $url) = @_;
-    my ( $dom, $js, $json, $file );
+sub get_filename {
+    my ( $self, $url ) = @_;
+    my ( $tx, $js, $json, $file );
 
-    $dom = $self->ua->get( $url )->result->dom;
+    $tx = $self->ua->get( $url );
+    return 0 unless $tx->success;
     
-    ($js) = $dom =~ /(eval\(function\(p,a,c,k,e,d\)\{.+?\)\)\))/;
+    ($js) = $tx->res->dom =~ /(eval\(function\(p,a,c,k,e,d\)\{.+?\)\)\))/;
     return 0 unless $js;
     return 0 unless Pstreamer::Util::Unpacker::is_valid( \$js );
     
@@ -29,7 +30,7 @@ sub get_filename{
     
     $json =~ s/file/"stream":"1","url"/g;
     $json =~ s/label/"name"/;
-    $json = decode_json($json);
+    $json = decode_json( $json );
     $json = [ grep { defined $_->{name} } @$json ];
 
     return $json;

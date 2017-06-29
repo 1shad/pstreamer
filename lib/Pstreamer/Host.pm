@@ -75,7 +75,7 @@ sub get_filename{
 
     $host = $self->_get_host($url);
     
-    print "$url\n" unless defined $host;
+    #print "$url\n" unless defined $host;
     return defined $host ? $host->get_filename($url) : undef ;
 }
 

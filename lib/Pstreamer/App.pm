@@ -28,8 +28,8 @@ use Moo;
 use MooX::Options description => 'perldoc Pstreamer::App pour les détails';
 
 has [qw(config ua tx stash term viewer host site cf command history)] => (
-	is => 'rw',
-	default => undef,
+    is => 'rw',
+    default => undef,
 );
 
 option go => (
@@ -47,20 +47,20 @@ option fullscreen => (
 );
 
 sub BUILD {
-	my $self = shift;
-	$self->_init;
+    my $self = shift;
+    $self->_init;
 }
 
 sub _init {
-	my $self = shift;
+    my $self = shift;
 
-	$self->config( Pstreamer::Config->instance );
-	$self->viewer( Pstreamer::Viewer->new );
-	$self->host( Pstreamer::Host->new );
-	$self->site( Pstreamer::Site->new );
-	$self->cf( Pstreamer::Util::CloudFlare->new );
-	$self->ua( $self->config->ua );
-	$self->term( $self->config->term );
+    $self->config( Pstreamer::Config->instance );
+    $self->viewer( Pstreamer::Viewer->new );
+    $self->host( Pstreamer::Host->new );
+    $self->site( Pstreamer::Site->new );
+    $self->cf( Pstreamer::Util::CloudFlare->new );
+    $self->ua( $self->config->ua );
+    $self->term( $self->config->term );
     $self->history( [] ); # LIFO
     $self->command( [qw(:q :s :p :m)] );
     $self->term->addhistory( $_ ) for @{$self->command};
@@ -68,18 +68,18 @@ sub _init {
 }
 
 sub run {
-	my $self = shift;
+    my $self = shift;
     my ( @choices, @tmp, $line ) ;
 
-	while ( 1 ){
-		my $count = 0;
+    while ( 1 ) {
+        my $count = 0;
 
         @choices = $self->site->get_sites unless $self->site->current;
 
-		# if only one host or stream url, it doesn't show the menu
-		if ( @choices == 1 && ! $self->_is_internal( $choices[0]->{url} ) ){
-			$line = 0;
-		}
+        # if only one host or stream url, it doesn't show the menu
+        if ( @choices == 1 && ! $self->_is_internal( $choices[0]->{url} ) ){
+            $line = 0;
+        }
         elsif ( @{$self->go} ) {
             $line = shift @{$self->go};
             if ( $line eq 'print') {
@@ -87,20 +87,20 @@ sub run {
                 $line = shift @{$self->go} // ':q';
             }
         }
-		else { # get user input
+        else { # get user input
 
-			for ( @choices ) {
-				say ($count>9?"":" ",colored($count++ ,'bold'),": ",$_->{name});
-			}
+            for ( @choices ) {
+                say ($count>9?"":" ",colored($count++ ,'bold'),": ",$_->{name});
+            }
             if ( $self->stash ) {
                 say colored( $self->stash, 'red' );
                 $self->stash(undef);
             }
-			$line = $self->term->readline(colored(">>> ", 'bold'));
-		}
+            $line = $self->term->readline(colored(">>> ", 'bold'));
+        }
         
         # proceed user input
-		next unless defined $line and $line ne "";
+        next unless defined $line and $line ne "";
 
         if ( $self->_is_command( $line ) ) {
             @tmp = $self->_proceed_command( $line );
@@ -113,8 +113,7 @@ sub run {
         }
         $self->stash( 'Aucun résultat') unless @tmp;
         @choices = @tmp if @tmp;
-	}
-
+    }
 }
 
 sub _print_choices {
@@ -150,26 +149,26 @@ sub _proceed_command {
 }
 
 sub _proceed_line {
-	my ( $self, $element ) = @_;
+    my ( $self, $element ) = @_;
     my @choices;
 
-	for( $element ) {
-		if( $_->{url} =~ /^PICO$/ ) { # site choice
-			$self->site->current( $_->{name} );
+    for( $element ) {
+        if( $_->{url} =~ /^PICO$/ ) { # site choice
+            $self->site->current( $_->{name} );
             $self->tx( $self->_get( $self->site->url ) );
-		}
-		elsif ( $self->_is_internal( $_->{url} ) ) { # site internal
-			if ( defined $_->{params} ) {
-				$self->site->current->params($_->{params});
-			} else {
+        }
+        elsif ( $self->_is_internal( $_->{url} ) ) { # site internal
+            if ( defined $_->{params} ) {
+                $self->site->current->params($_->{params});
+            } else {
                 $self->_add_history( $self->tx->req->url );
-				$self->tx( $self->_get( $_->{url} ) );
-			}
-		}
-		elsif ( defined $_->{stream} ) { # stream file
-			$self->viewer->stream( $_->{url}, $_->{stream} );
-		}
-		else { # host urls
+                $self->tx( $self->_get( $_->{url} ) );
+            }
+        }
+        elsif ( defined $_->{stream} ) { # stream file
+            $self->viewer->stream( $_->{url}, $_->{stream} );
+        }
+        else { # host urls
             my $res;
             try {
                 $res = $self->_proceed_host( $_->{url} );
@@ -177,8 +176,8 @@ sub _proceed_line {
                 warn $_ ;
             };
             return @{$res} if $res;
-		}
-	}
+        }
+    }
 
     try { @choices = $self->site->get_results($self->tx); }
     catch { warn $_ ; };
@@ -187,7 +186,7 @@ sub _proceed_line {
 
 sub _proceed_host {
     my ( $self, $url ) = @_;
-	my $res = $self->host->get_filename( $_->{url} );
+    my $res = $self->host->get_filename( $_->{url} );
 
     if ( $res and !refaddr( $res ) ) {
         $res = [{ url => $res, stream => 1 }];
@@ -203,7 +202,6 @@ sub _proceed_host {
     }
     return $res;
 }
-
 
 sub _proceed_search {
     my ( $self, $line ) = @_;
@@ -237,18 +235,18 @@ sub _is_command {
 }
 
 sub _is_internal {
-	my $self = shift;
-	my $link = shift;
-	my $host;
+    my $self = shift;
+    my $link = shift;
+    my $host;
 
-	# case 1: no site is active
-	return 0 unless $self->site->current;
+    # case 1: no site is active
+    return 0 unless $self->site->current;
 
-	# case 2: link is not internal. ie: host or stream file
-	$host = $self->site->url->host;
-	return 0 unless $link =~ /\Q$host/;
+    # case 2: link is not internal. ie: host or stream file
+    $host = $self->site->url->host;
+    return 0 unless $link =~ /\Q$host/;
 
-	return 1;
+    return 1;
 }
 
 sub _add_history {
@@ -261,6 +259,7 @@ sub _get_history {
     my $e = shift @{$self->history};
     return $e;
 }
+
 1;
 
 =head1 DESCRIPTION

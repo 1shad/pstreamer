@@ -12,9 +12,9 @@ use Moo;
 
 with 'Pstreamer::Role::UA';
 
-sub get_filename{
-    my ($self, $url) = @_;
-    my ($dom, $dom2, $file, $id, $key, $code, $code_url );
+sub get_filename {
+    my ( $self, $url ) = @_;
+    my ( $tx, $dom, $dom2, $file, $id, $key, $code, $code_url );
     my ( @results );
     
     # set up url
@@ -22,17 +22,24 @@ sub get_filename{
     $id = $self->_get_id( $url );
     $url = 'http://vidup.me/embed-'. $id .'.html';
     
+    # get it
+    $tx = $self->ua->get( $url );
+    return 0 unless $tx->success;
+    $dom = $tx->res->dom;
+    
     # find the key
-    $dom = $self->ua->get( $url )->result->dom;
     $key = $self->_get_key( $dom );
     
     # find the code 
     $code_url = 'http://vidup.me/jwv/'.$key;
-    $dom2 = html_unescape($self->ua->get( $code_url )->result->dom);
+    $tx = $self->ua->get( $code_url );
+    return 0 unless $tx->success;
+    $dom2 = html_unescape( $tx->res->dom );
     return 0 unless Pstreamer::Util::Unpacker::is_valid( \$dom2 );
-	$dom2 = Pstreamer::Util::Unpacker->new( packed => \$dom2 )->unpack;
+    $dom2 = Pstreamer::Util::Unpacker->new( packed => \$dom2 )->unpack;
     ($code) = $dom2 =~ /vt=([^"]+)"/;
 
+    # format datas
     while ( $dom =~ /"file":"([^"]+)","label":"([0-9]+)p"/g ){
         push( @results, {
             url  => $1.'?direct=false&ua=1&vt='.$code,
@@ -64,7 +71,7 @@ sub _set_url {
 
 sub _get_id {
     my ( $self, $url ) = @_;
-    my ($id) = $url =~ /vidup.me\/(.*)/;
+    my ( $id ) = $url =~ /vidup.me\/(.*)/;
     return $id;
 }
 

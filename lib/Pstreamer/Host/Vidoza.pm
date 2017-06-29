@@ -11,18 +11,19 @@ use Moo;
 
 with 'Pstreamer::Role::UA';
 
-sub get_filename{
-    my ($self, $url) = @_;
-    my ( $dom, $json );
+sub get_filename {
+    my ( $self, $url ) = @_;
+    my ( $tx, $json );
 
-    $dom = $self->ua->get( $url )->result->dom;
+    $tx = $self->ua->get( $url );
+    return 0 unless $tx->success;
     
-    ($json) = $dom =~ /sources:\s?(\[.*\]),/;
+    ($json) = $tx->res->dom =~ /sources:\s?(\[.*\]),/;
     return 0 unless $json;
 
     $json =~ s/file/"stream":"1","url"/g;
     $json =~ s/label/"name"/g;
-    $json = decode_json($json);
+    $json = decode_json( $json );
 
     return $json;
 }

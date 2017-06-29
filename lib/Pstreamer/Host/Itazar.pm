@@ -10,11 +10,13 @@ use Moo;
 
 with 'Pstreamer::Role::UA';
 
-sub get_filename{
-    my ($self, $url) = @_;
-    my ( $dom, $file, @results );
+sub get_filename {
+    my ( $self, $url ) = @_;
+    my ($tx, $dom, $file, @results );
 
-    $dom = $self->ua->get( $url )->result->dom;
+    $tx = $self->ua->get( $url );
+    return 0 unless $tx->success;
+    $dom = $tx->result->dom;
 
     while ( $dom =~ /"file":"([^"]+)","type":"([^"]+)","label":"([^"]+)"/g ) {
         push( @results, { 

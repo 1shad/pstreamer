@@ -11,12 +11,14 @@ use Moo;
 
 with 'Pstreamer::Role::UA';
 
-sub get_filename{
-    my ($self, $url) = @_;
-    my ($dom, $file, $params, $js );
+sub get_filename {
+    my ( $self, $url ) = @_;
+    my ( $tx, $dom, $file, $params, $js );
     
     $url = $self->_set_url( $url );
-    $dom = $self->ua->get( $url )->result->dom;
+    $tx = $self->ua->get( $url );
+    return 0 unless $tx->success;
+    $dom = $tx->res->dom;
     
     $params = { $dom->find('form[method="POST"] input')
         ->map( sub { { $_->attr('name') => $_->attr('value') } } )
@@ -25,7 +27,10 @@ sub get_filename{
     $params->{referer} = $url;
     
     $self->_wait(6); # 6s needed 
-    $dom = $self->ua->post( $url => form => $params )->result->dom;
+    $tx = $self->ua->post( $url => form => $params );
+    return 0 unless $tx->success;
+    $dom = $tx->res->dom;
+
     ($js) = $dom =~ /(eval\(function\(p,a,c,k,e(?:.|\s)+?\))\n?<\/script>/;
     
     if ($js) {
@@ -52,7 +57,7 @@ sub _wait {
         print "patientez: ".$s--."s\r";
         sleep(1);
     }
-    print "\n";
+    print ' 'x15 ."\r";
     $|--;
 }
 

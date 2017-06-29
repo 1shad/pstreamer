@@ -11,14 +11,17 @@ use Moo;
 
 with 'Pstreamer::Role::UA';
 
-sub get_filename{
-    my ($self, $url) = @_;
-    my ($dom, $file);
+sub get_filename {
+    my ( $self, $url ) = @_;
+    my ( $tx, $dom, $file );
 
-    $dom = $self->ua->get($url)->result->dom;
+    $tx = $self->ua->get( $url );
+    return 0 unless $tx->success;
+    $dom = $tx->res->dom;
     
     ($file) = $dom =~ /{file: *"([^"]+(?<!smil))"/;
     if (!$file and $dom =~ /(eval\s*\(\s*function(?:.|\s)+?)<\/script>/ ){
+        # let me know !
         say "-------------------------------";
         say "-- You must check Easyvid.pm --";
         say "-- url: $url";

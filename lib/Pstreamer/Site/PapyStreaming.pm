@@ -154,14 +154,14 @@ sub _get_papy_player_links {
 	my $headers = { Referer => $item->{url} };
     
     if ( my $iframe = $tx->res->dom->at('iframe') ) {
-		$tx = $self->ua->head( $iframe->attr('src') => $headers );
-		my $src = $iframe->attr('src');
-		
-		while ( $tx->res->code == 301 or $tx->res->code == 302 ) {
-			$headers->{Referer} = $src;
-			$src = $tx->res->headers->header('location');
-			$tx = $self->ua->head( $src => $headers );
-		}
+        $tx = $self->ua->head( $iframe->attr('src') => $headers );
+        my $src = $iframe->attr('src');
+
+        while ( $tx->res->code == 301 or $tx->res->code == 302 ) {
+            $headers->{Referer} = $src;
+            $src = $tx->res->headers->header('location');
+            $tx = $self->ua->head( $src => $headers );
+        }
 
         $json = [ {
             url  => Mojo::URL->new( $src )->host('drive.google.com'),

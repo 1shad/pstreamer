@@ -10,15 +10,16 @@ use Moo;
 
 with 'Pstreamer::Role::UA';
 
-sub get_filename{
-    my ($self, $url) = @_;
-    my ( $dom, $file );
+sub get_filename {
+    my ( $self, $url ) = @_;
+    my ( $tx, $file );
 
     $url = $self->_set_url($url);
 
-    $dom = $self->ua->get( $url )->result->dom;
+    $tx = $self->ua->get( $url );
+    return 0 unless $tx->success;
     
-    ($file) = $dom =~ /file: *[\'"](.+?)["\'],/;
+    ($file) = $tx->res->dom =~ /file: *[\'"](.+?)["\'],/;
     
     return $file?$file:0;
 }

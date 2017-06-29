@@ -10,13 +10,14 @@ use Moo;
 
 with 'Pstreamer::Role::UA';
 
-sub get_filename{
-    my ($self, $url) = @_;
-    my ( $dom, @results );
+sub get_filename {
+    my ( $self, $url ) = @_;
+    my ( $tx, @results );
 
-    $dom = $self->ua->get( $url )->result->dom;
+    $tx = $self->ua->get( $url );
+    return 0 unless $tx->success;
 
-    @results = $dom->find('source')
+    @results = $tx->res->dom->find('source')
         ->map( sub{ { 
             url    => $_->attr('src'), 
             name   => $_->attr('type'),

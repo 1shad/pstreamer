@@ -12,8 +12,8 @@ use Moo;
 
 with 'Pstreamer::Role::UA';
 
-sub get_filename{
-    my ($self, $url) = @_;
+sub get_filename {
+    my ( $self, $url ) = @_;
     my ( $cf, $tx, $id, $dom, $js, $JsU, $file );
     
     $id = $self->_get_id($url);

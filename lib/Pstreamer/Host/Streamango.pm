@@ -10,11 +10,13 @@ use Moo;
 
 with 'Pstreamer::Role::UA';
 
-sub get_filename{
-    my ($self, $url) = @_;
-    my ( $dom, $file );
+sub get_filename {
+    my ( $self, $url ) = @_;
+    my ( $tx, $dom, $file );
 
-    $dom = $self->ua->get( $url )->result->dom;
+    $tx = $self->ua->get( $url );
+    return 0 unless $tx->success;
+    $dom = $tx->res->dom;
     
     ($file) = $dom =~ /{type:"video\/mp4",src:"([^"]+)",/;
     if ($file) {

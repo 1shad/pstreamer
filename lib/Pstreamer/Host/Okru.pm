@@ -12,25 +12,26 @@ use Moo;
 
 with 'Pstreamer::Role::UA';
 
-sub get_filename{
+sub get_filename {
     my ( $self, $url ) = @_;
-    my ( $dom, $id, $host, $json, @files );
+    my ( $tx, $div, $id, $host, $json, @files );
     
     ( $host, $id ) = $self->_parse_url( $url );
     
     $self->ua->max_redirects(1);
-    $dom = $self->ua->get( 'http://'.$host.'/videoembed/'.$id )->result->dom;
+    $tx = $self->ua->get( 'http://'.$host.'/videoembed/'.$id );
     $self->ua->max_redirects(0);
+
+    return 0 unless $tx->success;
+    $div = $tx->res->dom->at('div[data-module="OKVideo"]');
+    return 0 unless $div;
     
-    $dom = $dom->at('div[data-module="OKVideo"]');
-    return 0 unless $dom;
-    
-    # this is a json string
-    $json = $dom->attr('data-options');
+    # json string
+    $json = $div->attr('data-options');
     $json = decode_json(encode 'UTF-8', $json);
     $json = decode_json(encode 'UTF-8', $json->{flashvars}->{metadata});
     
-    # it is the right format, so it just removes the
+    # right format, so it just removes the
     # unwanted items and setup url with required headers.
     @files = @{$json->{videos}};
     @files = map {

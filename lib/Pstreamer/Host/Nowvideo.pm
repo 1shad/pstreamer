@@ -13,22 +13,24 @@ use Moo;
 
 with 'Pstreamer::Role::UA';
 
-sub get_filename{
-    my ($self, $url) = @_;
-    my ( $dom, $file, $rand, @results );
+sub get_filename {
+    my ( $self, $url ) = @_;
+    my ( $tx, $dom, $file, $rand, @results );
 
-	$url = $self->_set_url( $url );
-	$self->ua->max_redirects(5);
-    $dom = $self->ua->get( $url )->result->dom;
-	$self->ua->max_redirects(0);
+    $url = $self->_set_url( $url );
+    $self->ua->max_redirects(5);
+    $tx = $self->ua->get( $url );
+    $self->ua->max_redirects(0);
+    
+    return 0 unless $tx->success;
+    $dom = $tx->res->dom;
 
-	if ( $file = $dom =~ /player.src.+?src: *'([^']+)/ ){
-		say "--- you must check Nowvideo.pm ---";
-		say "url: $url";
-		say "file: $file";
-		$file = 0;
+    if ( $file = $dom =~ /player.src.+?src: *'([^']+)/ ){
+        say "--- you must check Nowvideo.pm ---";
+        say "url: $url";
+        say "file: $file";
         return 0;
-	}
+    }
 
     @results = $dom->find('source')
         ->map( sub{ { 

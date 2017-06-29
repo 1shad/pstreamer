@@ -92,8 +92,8 @@ sub _get_film_links {
 
     @results = $dom->find('.tab-buttons-panel iframe')
         ->map( sub { { 
-                url => $_->attr('src'),
-                name => $title.' - '.$hosters{$_->parent->attr('id')}
+            url => $_->attr('src'),
+            name => $title.' - '.$hosters{$_->parent->attr('id')},
         } } )
         #->grep( sub { defined $_->{name} } )
         ->each;

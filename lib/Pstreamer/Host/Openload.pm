@@ -13,7 +13,7 @@ use Moo;
 with 'Pstreamer::Role::UA';
 
 sub get_filename {
-	my ( $self, $url ) = @_;
+    my ( $self, $url ) = @_;
     my ( $dom, $file, $mech );
 	
     print "[ phantomjs ]\n";
@@ -25,8 +25,8 @@ sub get_filename {
         page.onInitialized = function() {
             page.evaluate(function() {
                 delete window._mech;
-    	        delete window.callPhantom;
-  	        });
+                delete window.callPhantom;
+            });
         };
 JS1
     

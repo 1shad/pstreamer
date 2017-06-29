@@ -13,8 +13,8 @@ use Moo;
 
 with 'Pstreamer::Role::UA';
 
-sub get_filename{
-    my ($self, $url) = @_;
+sub get_filename {
+    my ( $self, $url ) = @_;
     my ( $tx, $dom, $headers, $form, $url2, $host, $wise, $file );
     my ( $at, $iss, $vid, $pass, $referer, $vid_server, $vid_link );
 

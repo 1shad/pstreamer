@@ -30,13 +30,14 @@ my %FORMATS = (
 	'59' => 'mp4',
 );
 
-sub get_filename{
-    my ($self, $url) = @_;
+sub get_filename {
+    my ( $self, $url ) = @_;
     my ( $tx, $files, $cookies, $fmt_stream_map, $fmt_list );
 
     $url = $self->_set_url($url);
 
     $tx = $self->ua->get($url);
+    return 0 unless $tx->success;
 
     if ( $tx->res->dom =~ /"reason"\s*,\s*"([^"]+)/ ) {
         warn "$1";
