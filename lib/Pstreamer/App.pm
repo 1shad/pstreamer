@@ -37,13 +37,20 @@ option go => (
     format => 's@',
     default => sub { [] },
     autosplit => ',',
-    doc => "automate, ex: --go=2,'ma serie'",
+    doc => "Automate, ex: --go=2,'ma serie'",
 );
 
 option fullscreen => (
     is => 'ro',
     short => 'fs',
-    doc => '--fs, lance mpv en plein ecran',
+    negatable => 1,
+    doc => 'Videos en plein ecran',
+);
+
+option version => (
+    is => 'ro',
+    short => 'v',
+    doc => 'Affiche la version',
 );
 
 sub BUILD {
@@ -54,7 +61,13 @@ sub BUILD {
 sub _init {
     my $self = shift;
 
-    $self->config( Pstreamer::Config->instance );
+    my %options = (
+        fullscreen => $self->fullscreen,
+    );
+
+    defined $options{$_} or delete $options{$_} for keys %options;
+
+    $self->config( Pstreamer::Config->instance( %options  ) );
     $self->viewer( Pstreamer::Viewer->new );
     $self->host( Pstreamer::Host->new );
     $self->site( Pstreamer::Site->new );
@@ -64,12 +77,16 @@ sub _init {
     $self->history( [] ); # LIFO
     $self->command( [qw(:q :s :p :m)] );
     $self->term->addhistory( $_ ) for @{$self->command};
-    $self->config->fullscreen( $self->fullscreen );
 }
 
 sub run {
     my $self = shift;
-    my ( @choices, @tmp, $line ) ;
+    my ( @choices, @tmp, $line );
+
+    if ( $self->version ) {
+        say "\nThis is pstreamer version $VERSION\n";
+        exit;
+    }
 
     while ( 1 ) {
         my $count = 0;
@@ -358,6 +375,8 @@ sub _get_history {
 
 =item MooX::Options
 
+=item MooX::ConfigFromFile
+
 =item Class::Inspector
 
 =item Term::ANSIColor
@@ -367,6 +386,10 @@ sub _get_history {
 =item Scalar::Util
 
 =item File::Spec
+
+=item File::HomeDir
+
+=item Config::Tiny
 
 =item Try::Tiny
 

@@ -5,17 +5,22 @@ package Pstreamer::Config;
  Pstreamer::Config
 
 =cut
-
 use utf8;
 use Mojo::UserAgent;
 use Term::ReadLine;
 use File::Spec;
+use File::Basename;
 use Pstreamer::Util::CookieJarFile;
 use Moo;
+use MooX::ConfigFromFile
+config_singleton  => 1,
+config_prefix     => 'config',
+config_identifier => basename($0),
+;
 
 with 'MooX::Singleton';
 
-my $CONFIG_DIR = File::Spec->catdir( $ENV{HOME}, '.config', $0 );
+my $CONFIG_DIR = File::Spec->catdir( $ENV{HOME}, '.config', basename($0) );
 
 has [qw(ua term)] => ( is => 'ro', lazy => 1, builder => 1 );
 
@@ -35,7 +40,7 @@ has config_file => ( is => 'ro', default => sub {
     File::Spec->catfile( $CONFIG_DIR, 'config' );
 });
 
-has [qw(cookie fullscreen)] => ( is => 'rw' );
+has [qw(cookies fullscreen)] => ( is => 'rw' );
 
 sub _build_ua {
     my $self = shift;
@@ -45,7 +50,7 @@ sub _build_ua {
     
     $ua = $ua->cookie_jar(
         Pstreamer::Util::CookieJarFile->new( cookie_file => $self->cookie_file )
-    ) if $self->cookie;
+    ) if $self->cookies;
     
     $ua->on( start => sub {
         my ( $ua, $tx ) = @_;
