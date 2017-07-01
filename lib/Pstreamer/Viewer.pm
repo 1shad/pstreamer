@@ -25,7 +25,6 @@ sub stream {
     ( $file, $headers ) = $self->_parse_url( $file );
     
     $self->_player($file, $headers);
-        
 }
 
 sub _player {
@@ -72,6 +71,7 @@ sub _player {
     print "[ mpv ]\n";
     my ( $success ) = run( command => $cmd, verbose => 0 );
     warn "Error while reading the file with mpv" unless $success;
+    return $success;
 }
 
 sub _parse_url {
