@@ -17,7 +17,7 @@ has config => ( is => 'ro', default => sub {
 });
 
 sub stream {
-    my ( $self, $file, $type ) = @_;
+    my ( $self, $file ) = @_;
     my ( $headers );
     
     return if ( !$file );
@@ -76,10 +76,17 @@ sub _player {
 
 sub _parse_url {
     my ( $self, $file ) = @_;
+    return undef unless $file;
+    
     my ( $headers, @temp ) = ( undef, split( /\|/, $file ) );
     ( $file, $headers ) = @temp;
+    
     @temp = split /&/, $headers||'';
-    $headers = { map { my @t = split /=/, $_; { $t[0] => $t[1] } } @temp };
+    $headers = { map { 
+        my @t = split /=/;
+        { $t[0] => $t[1] // '1' } 
+    } grep { $_ } @temp };
+    
     return ($file, $headers);
 }
 
