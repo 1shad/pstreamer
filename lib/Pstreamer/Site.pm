@@ -12,12 +12,13 @@ use Moo;
 
 my %sites = (
     # name => "PackageName",
+    sample              => "Pstreamer::Site::Sample",
     streaming_series_cx => "Pstreamer::Site::StreamingSeriescx",
-    sokrostream => "Pstreamer::Site::SokroStream",
-    librestream => "Pstreamer::Site::LibreStream",
-    Radego => "Pstreamer::Site::Radego",
-    papystreaming => "Pstreamer::Site::PapyStreaming",
-    skstream => "Pstreamer::Site::Skstream",
+    sokrostream         => "Pstreamer::Site::SokroStream",
+    librestream         => "Pstreamer::Site::LibreStream",
+    Radego              => "Pstreamer::Site::Radego",
+    papystreaming       => "Pstreamer::Site::PapyStreaming",
+    skstream            => "Pstreamer::Site::Skstream",
 );
 
 ###########################
@@ -29,6 +30,7 @@ has current => (
     coerce => sub {
         my $current = shift;
         return undef unless defined $current;
+        return undef unless defined $sites{$current};
         unless ( Class::Inspector->loaded( $sites{$current} ) ) {
             eval "require $sites{$current}";
             confess $@ if $@;
@@ -44,6 +46,7 @@ sub get_sites {
     my $self = shift;
     my @results = ();
     for my $site (sort keys %sites ){
+        next if $site eq 'sample';
         my %result;
         $result{name} = $site;
         $result{url} = "PICO";

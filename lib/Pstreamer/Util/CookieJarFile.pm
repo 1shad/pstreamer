@@ -8,7 +8,7 @@ package Pstreamer::Util::CookieJarFile;
 
  ...
  my $ua = Mojo::UserAgent->new;
- my $cj = Pstreamer::Util::CookieJarFile->new( cookie_file => 'filename' );
+ my $cj = Pstreamer::Util::CookieJarFile->new( cookies_file => 'filename' );
  $ua = $ua->cookie_jar( $cj );
  ...
 
@@ -24,20 +24,20 @@ use Mojo::File;
 use Scalar::Util 'blessed';
 use Carp 'croak';
 
-has 'cookie_file';
+has 'cookies_file';
 
 sub new {
     my ( $proto, %param ) = @_;
     my $self = shift->SUPER::new( %param );
-    croak 'cookie_file must be specified' unless defined $self->{cookie_file};
+    croak 'cookies_file must be specified' unless defined $self->{cookies_file};
     $self->_load_cookies;
     return $self;
 }
 
 sub _load_cookies {
     my $self = shift;
-    return unless -r $self->cookie_file;
-    my $path = Mojo::File->new( $self->cookie_file );
+    return unless -r $self->cookies_file;
+    my $path = Mojo::File->new( $self->cookies_file );
     my $content = decode 'UTF-8', $path->slurp;
     defined( $_ = $self->_parse_cookie($_)) and $self->SUPER::add($_) 
         for $content =~ /^.*$/mg;    
@@ -98,9 +98,9 @@ sub _parse_cookie {
 
 sub _save_cookies {
     my ( $self ) = @_;
-    return unless $self->cookie_file;
+    return unless $self->cookies_file;
     my $content = "# Cookies saved by CookieJarFile\n#\n";
-    my $path = Mojo::File->new($self->cookie_file);
+    my $path = Mojo::File->new($self->cookies_file);
     $content .= $self->_format_cookie($_) for @{$self->all};
     # create the path if it doesn't exists
     $path->dirname->make_path;

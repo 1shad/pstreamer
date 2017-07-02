@@ -1,10 +1,10 @@
 ## NAME
 
-Pstreamer::App - Streaming with perl 
+Pstreamer::App - Application de streaming vidéo
 
 ## VERSION
 
-Version 0.001
+Version 0.002
 
 ## DESCRIPTION
 
@@ -18,10 +18,12 @@ Version 0.001
 ## UTILISATION
 
     Pour lancer pstreamer, executer:
-    $ pstreamer
+```sh
+$ pstreamer
+```
 
     Le programme affiche les liens avec des numeros en début de ligne.
-    Taper le numero de la ligne pour aller à la page suivante ou alors
+    Taper le numero de la ligne puis entrée pour continuer ou alors
     écrire un texte pour lancer une recherche.
 
     Les commandes du prompt disponibles sont:
@@ -32,10 +34,21 @@ Version 0.001
 
 ## OPTIONS
 
+    Les options de la ligne de commande sont prioritaires
+    par rapport à celles du fichier de configuration.
+
+### --version|-v
+
+    Affiche la version.
+
 ### --fullscreen|--fs
 
-    Lance mpv en plein ecran.
-    
+    Lance mpv en plein ecran. Désactivée par défault.
+
+### --no-fullscreen|--no-fs
+
+    Désactive le plein ecran, si l'option est activée dans
+    fichier de configuration.
 
 ### --go
 
@@ -71,15 +84,89 @@ Version 0.001
         sinon il continue avec ce qui suit.
         
 
+## CONFIGURATION
+
+    Vous pouvez utiliser un fichier de configuration, si vous
+    le souhaitez, pour paramétrer quelques propriétés ou options.
+
+    Le format du fichier est libre, mais dépends d'un certain module.
+    Si vous avez déja un des modules de la liste, très bien sinon
+    installez en un pour utiliser le format qui vous plait.
+
+    Liste avec modules associés et extensions du fichier:
+        - Yaml (.yaml|.yml) :
+             YAML, YAML::XS, YAML::Syck
+        - Json (.json|.jsn) :
+            JSON, Cpanel::JSON::XS, JSON::MaybeXS, JSON::XS, JSON::Syck ...
+        - Xml (.xml) :
+            XML::Simple
+        - Conf ( .conf|.cnf )
+            Config::General
+        - INI ( .ini )
+            Config::Tiny
+
+    Evidemment, évitez de mettre du yaml dans un fichier .json ...
+
+    Le nom fichier doit être 'config' avec l'extension qui vous plait.
+    Par exemple:
+        config.ini
+
+    Le fichier de configuration doit être placé dans un
+    des repertoires suivant:
+        $HOME/.pstreamer/
+        $HOME/.config/pstreamer/
+
+    Les options actuellement disponibles sont:
+        fullscreen: 0 ou 1
+        cookies: 0 ou 1
+        user_agent: texte
+
+    
+    - Exemple d'un fichier INI -
+
+    # debut du fichier config.ini
+    user_agent = Mozilla/5.0 (X11; Linux) AppleWebKit/538.15...
+    fullscreen = 1
+    cookies = 1
+    # fin
+    
+    - Note pour les cookies:
+    Pstreamer utilisera un fichier pour stocker les cookies si
+    vous activer l'option.
+    Permet de réutiliser ses cookies entre chaques sessions.
+    C'est utile pour cloudflare IMUA, mais pas encore optimisé.
+    Donc l'option n'est pas disponible pour la ligne de commande.
+    
+    L'emplacement du fichier est pour l'instant:
+        $HOME/.config/pstreamer/cookies/
+    
+
 ## INSTALLATION
 
-    Pour installer pstreamer, exécuter:
-       
-       git clone https://github.com/1shad/pstreamer.git
-       cd pstreamer
-       perl Makefile.PL
-       make
-       make install
+Pour installer pstreamer, exécuter:
+
+```sh       
+$ git clone https://github.com/1shad/pstreamer.git
+$ cd pstreamer
+```
+
+Si vous posséder une installation locale de perl.
+Vous pouvez installer depuis le répertoire en utilisant cpanm,
+ce qui installera toutes les dépendances en même temps :
+
+```sh
+$ cpanm .
+```
+
+Sinon, installez les dépendances puis :
+      
+```sh
+$ perl Makefile.PL
+$ make
+$ make test
+$ make install (sudo make install si pas de copie locale de perl)
+```
+
 
 ## DOCUMENTATION
 
@@ -96,11 +183,16 @@ Version 0.001
 - WWW::Mechanize::PhantomJS
 - MooX::Singleton
 - MooX::Options
+- MooX::ConfigFromFile
 - Class::Inspector
 - Term::ANSIColor
 - Term::ReadLine::Gnu
 - Scalar::Util
 - File::Spec
+- File::HomeDir
+- File::Basename
+- Data::Record
+- Regexp::Common
 - Try::Tiny
 
 ### Programmes externes requis:

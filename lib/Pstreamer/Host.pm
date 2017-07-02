@@ -16,6 +16,7 @@ use Moo;
 #
 my %hosters = (
     # name         => 'PackageName';
+    'sample.test'  => 'Pstreamer::Host::Sample',
     easyvid        => 'Pstreamer::Host::Easyvid',
     vidup          => 'Pstreamer::Host::Vidup',
     vidto          => 'Pstreamer::Host::Vidto',
@@ -47,6 +48,8 @@ my %hosters = (
 sub _get_host {
     my ( $self, $url ) = @_;
     my $host = undef;
+    
+    return undef unless defined $url;
 
     for my $key ( keys %hosters ) {
         $host = $hosters{$key} if $url =~ /\Q$key\E/;

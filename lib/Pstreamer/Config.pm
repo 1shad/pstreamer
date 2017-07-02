@@ -32,12 +32,12 @@ has header_accept => ( is => 'ro', default =>
     'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
 );
 
-has cookie_file => ( is => 'ro', default => sub {
+has cookies_file => ( is => 'ro', default => sub {
     File::Spec->catfile($CONFIG_DIR, 'cookies', 'cookies.txt');
 });
 
 has config_file => ( is => 'ro', default => sub {
-    File::Spec->catfile( $CONFIG_DIR, 'config' );
+    File::Spec->catfile( $CONFIG_DIR, 'config.ini' );
 });
 
 has [qw(cookies fullscreen)] => ( is => 'rw' );
@@ -49,7 +49,7 @@ sub _build_ua {
     $ua->transactor->name( $self->user_agent );
     
     $ua = $ua->cookie_jar(
-        Pstreamer::Util::CookieJarFile->new( cookie_file => $self->cookie_file )
+        Pstreamer::Util::CookieJarFile->new( cookies_file => $self->cookies_file )
     ) if $self->cookies;
     
     $ua->on( start => sub {
