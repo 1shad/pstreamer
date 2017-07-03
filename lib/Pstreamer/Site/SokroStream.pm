@@ -11,9 +11,11 @@ use Mojo::URL;
 use Mojo::Util 'trim';
 use Moo;
 
-has url => ( is => 'ro', default => 'http://sokrostream.cc/' );
+with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
 
-has menu => ( is => 'ro', default => sub { { 
+has '+url' => ( default => 'http://sokrostream.cc/' );
+
+has '+menu' => ( default => sub { { 
     'Accueil'                => '/',
     'Films derniers ajouts'  => "/categories/films-streaming",
     'Series derniers ajouts' => "/categories/series-streaming",
@@ -21,8 +23,6 @@ has menu => ( is => 'ro', default => sub { {
     'Les plus commentés'     => "/les-films-les-plus-commentes-2",
     'Les mieux notés'        => "films-les-mieux-notes-2",
 } } );
-
-with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
 
 sub search {
     my ( $self, $text ) = @_;

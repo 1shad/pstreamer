@@ -12,9 +12,11 @@ use Mojo::Util 'trim';
 use Mojo::URL;
 use Moo;
 
-has url => ( is => 'ro', default => 'http://papy-streaming.org/' );
+with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
 
-has menu => ( is => 'ro', default => sub { {
+has '+url' => ( default => 'http://papy-streaming.org/' );
+
+has '+menu' => ( default => sub { {
     'Accueil'          => '/',
     'Film Streaming'   => '/film-streaming-hd/',
     'Series Streaming' => '/series-streaming-hd/',
@@ -23,8 +25,6 @@ has menu => ( is => 'ro', default => sub { {
     'Les plus vues'    => '/de-visite/',
     'Les mieux notées' => '/de-vote/',
 } } );
-
-with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
 
 sub search {
     my ( $self, $text ) = @_;

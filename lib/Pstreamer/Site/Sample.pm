@@ -12,16 +12,13 @@ package Pstreamer::Site::Sample;
 
 use Moo;
 
-has url => (
-    is => 'ro',
-    default => '/sample.test',
-);
+with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
 
-has menu => ( is => 'ro', default => sub { {
+has '+url' => ( default => '/sample.test' );
+
+has '+menu' => ( default => sub { {
     'Home' => '/',
 } } );
-
-with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
 
 sub search {
     my ( $self, $text ) = @_;

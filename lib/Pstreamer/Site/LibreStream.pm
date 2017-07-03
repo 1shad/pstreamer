@@ -9,9 +9,11 @@ package Pstreamer::Site::LibreStream;
 use Mojo::Util 'trim';
 use Moo;
 
-has url => ( is => 'ro', default => 'http://ls-streaming.com/' );
+with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
 
-has menu => ( is => 'ro', default => sub { {
+has '+url' => ( default => 'http://ls-streaming.com/' );
+
+has '+menu' => ( default => sub { {
     'Accueil'  => '/',
     'Series'   => '/series/',
     'Films'    => '/films/',
@@ -19,8 +21,6 @@ has menu => ( is => 'ro', default => sub { {
     'Dvdrip'   => '/quality/dvdrip/',
     'Bdrip'    => '/quality/bdrip/',
 } } );
-
-with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
 
 sub search {
     my ( $self, $text ) = @_;

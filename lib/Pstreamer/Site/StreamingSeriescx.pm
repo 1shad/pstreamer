@@ -9,9 +9,11 @@ package Pstreamer::Site::StreamingSeriescx;
 use utf8;
 use Moo;
 
-has url => ( is => 'ro', default => 'http://www.streaming-series.cx/' );
+with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
 
-has menu => ( is => 'ro', default => sub { {
+has '+url' => ( default => 'http://www.streaming-series.cx/' );
+
+has '+menu' => ( default => sub { {
     'Accueil'      => '/',
     'Action'       => '/category/action/',
     'Animation'    => '/category/animation/',
@@ -21,7 +23,6 @@ has menu => ( is => 'ro', default => sub { {
     'Fantastique'  => '/category/fantastique/',
 } } );
 
-with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
 
 sub search {
     my ( $self, $text ) = @_;

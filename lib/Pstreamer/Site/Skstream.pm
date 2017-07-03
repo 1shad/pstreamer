@@ -11,16 +11,16 @@ use Mojo::Util 'trim';
 use Mojo::JSON 'decode_json';
 use Moo;
 
-has url => ( is =>'ro', default => 'http://www.skstream.co/' );
+with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
 
-has menu => ( is => 'ro', default => sub { {
+has '+url' => ( default => 'http://www.skstream.co/' );
+
+has '+menu' => ( default => sub { {
     'Accueil' => '/',
     'Films'   => '/films',
     'Series'  => '/series',
     'Mangas'  => '/mangas',
 } } );
-
-with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
 
 sub search {
     my ( $self, $text ) = @_;
