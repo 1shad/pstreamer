@@ -13,6 +13,7 @@ my $cf   = Pstreamer::Util::CloudFlare->new;
 
 # use the app ua
 $t = $t->ua( $site->ua );
+$t->ua->max_redirects(5);
 
 # test menu links and results
 foreach my $e ( @{$site->menu} ) {
@@ -25,4 +26,4 @@ foreach my $e ( @{$site->menu} ) {
 done_testing();
 
 # to run test use:
-# $ prove -l -v t/14-skstream.t
+# $ prove -lv t/14-skstream.t
