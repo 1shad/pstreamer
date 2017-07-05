@@ -1,16 +1,18 @@
 use Test::More;
 use Test::Mojo;
-use Pstreamer::Site::Radego;
-use Pstreamer::Util::CloudFlare;
 
 unless ( $ENV{PSTREAMER_TESTING} ) {
     plan( skip_all => "URL tests not required for installation" );
 }
 
+use_ok( Pstreamer::Site::Radego );
+use_ok( Pstreamer::Util::CloudFlare );
+
 my $t    = Test::Mojo->new;
 my $site = Pstreamer::Site::Radego->new;
 my $cf   = Pstreamer::Util::CloudFlare->new;
 
+$site->_init;
 # use the app ua
 $t = $t->ua( $site->ua );
 $t->ua->max_redirects(5);

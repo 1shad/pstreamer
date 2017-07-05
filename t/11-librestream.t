@@ -1,16 +1,18 @@
 use Test::More;
 use Test::Mojo;
-use Pstreamer::Site::LibreStream;
-use Pstreamer::Util::CloudFlare;
 
 unless ( $ENV{PSTREAMER_TESTING} ) {
     plan( skip_all => "URL tests not required for installation" );
 }
 
+use_ok( Pstreamer::Site::LibreStream );
+use_ok( Pstreamer::Util::CloudFlare );
+
 my $t    = Test::Mojo->new;
 my $site = Pstreamer::Site::LibreStream->new;
 my $cf   = Pstreamer::Util::CloudFlare->new;
 
+$site->_init;
 # use the app ua
 $t = $t->ua( $site->ua );
 $t->ua->max_redirects(5);
