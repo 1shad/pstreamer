@@ -29,19 +29,18 @@ has current => (
     default => undef,
     coerce => sub {
         my $current = shift;
-        return undef unless defined $current;
-        return undef unless defined $sites{$current};
+        return undef unless defined $current and defined $sites{$current};
         unless ( Class::Inspector->loaded( $sites{$current} ) ) {
             eval "require $sites{$current}";
             confess $@ if $@;
         }
-        return $sites{$current}->new;
+        $sites{$current}->new->_init;
     },
+    handles => 'Pstreamer::Role::Site',
 );
 
 ###########################
-# Returns an array of hashes with names
-# used by current to select the package
+# Returns the list of current sites
 sub get_sites {
     my $self = shift;
     my @results = ();
@@ -55,46 +54,11 @@ sub get_sites {
     return @results;
 }
 
-###########################
-# Fonctions defined in
-# Pstreamer::Site::Packages
-###########################
-sub url {
-    my $self = shift;
-    return "" unless defined $self->current;
-    return $self->current->url;
-}
-
-sub menu {
-    my $self = shift;
-    return () unless defined $self->current;
-    return $self->current->menu;
-}
-
-sub search {
-    my ( $self, $text ) = @_;
-    return () unless defined $self->current;
-    return $self->current->search($text);
-}
-
-sub get_results {
-    my ( $self, $tx ) = @_;
-    return () unless defined $self->current;
-    return () unless $tx;
-    return $self->current->get_results( $tx );
-}
-
-sub params {
-    my ( $self, $params ) = @_;
-    return 0 unless defined $self->current;
-    return $self->current->params($params);
-}
-
 1;
 
 =head1 DESCRIPTION
 
- A kind of factory class
+ A factory class.
 
 =head1 SEE ALSO
 
