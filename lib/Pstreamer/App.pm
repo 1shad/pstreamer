@@ -8,11 +8,11 @@ Pstreamer::App - Application de streaming vidéo
 
 =head1 VERSION
 
- Version 0.002
+ Version 0.003
 
 =cut
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 use utf8;
 use feature 'say';
@@ -29,7 +29,6 @@ use MooX::Options description => 'perldoc Pstreamer::App pour les détails';
 
 has [qw(config ua tx stash term viewer host site cf command history)] => (
     is => 'rw',
-    default => undef,
 );
 
 option go => (
@@ -53,10 +52,7 @@ option version => (
     doc => 'Affiche la version',
 );
 
-sub BUILD {
-    my $self = shift;
-    $self->_init;
-}
+before run => sub { shift->_init };
 
 sub _init {
     my $self = shift;
@@ -75,8 +71,9 @@ sub _init {
     $self->ua( $self->config->ua );
     $self->term( $self->config->term );
     $self->history( [] ); # LIFO
-    $self->command( [qw(:q :s :p :m)] );
+    $self->command( [qw(:quit :s :p :m)] );
     $self->term->addhistory( $_ ) for @{$self->command};
+    push @{$self->command}, qw(:q q :exit);
 }
 
 sub run {
@@ -105,10 +102,7 @@ sub run {
             }
         }
         else { # get user input
-
-            for ( @choices ) {
-                say ($count>9?"":" ",colored($count++ ,'bold'),": ",$_->{name});
-            }
+            $self->_print_choices( @choices );
             if ( $self->stash ) {
                 say colored( $self->stash, 'red' );
                 $self->stash(undef);
@@ -142,12 +136,12 @@ sub _print_choices {
     }
 }
 
-
 sub _proceed_command {
     my ( $self, $line ) = @_;
     my ( $previous, @choices );
 
-    exit if $line eq ":q";
+    #exit if $line eq ":q";
+    exit if $line =~ /^(:q|q|:quit|:exit)$/;
 
     if ( $line eq ":s" ) {
         @choices = $self->site->get_sites;
@@ -172,7 +166,14 @@ sub _proceed_line {
     for( $element ) {
         if( $_->{url} =~ /^PICO$/ ) { # site choice
             $self->site->current( $_->{name} );
+            # it needs to follow redirects here
+            $self->ua->max_redirects(5);
             $self->tx( $self->_get( $self->site->url ) );
+            $self->ua->max_redirects(0);
+            # set in case url has changed
+            if ( $self->site->url ne $self->tx->req->url ) {
+                $self->site->url( $self->tx->req->url );
+            }
         }
         elsif ( $self->_is_internal( $_->{url} ) ) { # site internal
             if ( defined $_->{params} ) {
@@ -209,7 +210,7 @@ sub _proceed_host {
         $res = [{ url => $res, stream => 1 }];
     }
     elsif ( $res and refaddr( $res ) ) {
-        $res = $res;
+        $res = $res; # ...
     }
     elsif ( !$res and defined $res ) { # = 0
         $self->stash('Fichier introuvable');
@@ -256,7 +257,7 @@ sub _is_internal {
     my $link = shift;
     my $host;
 
-    # case 1: no site is active
+    # case 1: no site active
     return 0 unless $self->site->current;
 
     # case 2: link is not internal. ie: host or stream file
@@ -284,7 +285,7 @@ sub _get_history {
 Pstreamer permet de visionner des films ou des series,  
 en streaming, depuis un terminal. Il fonctionne sous GNU/Linux.
 
-Il se connecte à certains sites français. Perrmet de parcourir le site  
+Il se connecte à certains sites français. Permet de les parcourir  
 via les liens disponibles ou par son menu, et permet de faire des recherches.  
 Les vidéos sont lues depuis les hébergeurs avec mpv.
 
@@ -300,10 +301,10 @@ Taper le numéro de la ligne puis entrée pour continuer ou alors
 
 Les commandes du prompt disponibles sont:
 
-    :p pour précédent
-    :m pour afficher le menu du site
-    :s pour afficher les sites
-    :q pour quitter
+    :p précédent
+    :m afficher le menu du site
+    :s afficher les sites
+    :q quitter  
 
 =head1 OPTIONS
 
@@ -318,7 +319,7 @@ Affiche la version.
 
 Lance mpv en plein écran. Désactivée par défault.
 
-=head2 --no-fullscreen|--no-fs
+=head2 --no-fullscreen
 
 Désactive le plein écran, si l'option est activée dans  
 fichier de configuration.
@@ -378,7 +379,7 @@ le souhaitez, pour paramétrer quelques propriétés ou options.
 Le format du fichier est libre, mais dépends d'un certain module.  
 Installez un des modules de la liste pour utiliser le format voulue.
 
-Liste des formats avec extensions du fichier et modules associés:
+La liste des formats:
 
     - Yaml (.yaml|.yml) :
             YAML, YAML::XS, YAML::Syck
@@ -390,8 +391,6 @@ Liste des formats avec extensions du fichier et modules associés:
             Config::General
     - INI ( .ini )
             Config::Tiny
-
-Evidemment, évitez de mettre du yaml dans un fichier .json ...
 
 Le nom du fichier doit être 'config' avec l'extension qui vous plait.  
 
@@ -420,7 +419,6 @@ Exemple d'un fichier INI:
 Note pour les cookies:  
 Pstreamer utilisera un fichier pour stocker les cookies si  
 vous activer l'option.  
-Permet de réutiliser ses cookies entre chaques sessions.  
 C'est utile pour cloudflare IMUA, mais pas encore optimisé.  
 Donc l'option n'est pas disponible pour la ligne de commande.  
 
@@ -437,7 +435,7 @@ Pour installer pstreamer, exécutez:
 
 Si vous avez une installation locale de perl.  
 Vous pouvez installer depuis le répertoire en utilisant cpanm,  
-qui installera les dépendances en même temps :
+qui installera les dépendances :
 
     $ cpanm .
 
