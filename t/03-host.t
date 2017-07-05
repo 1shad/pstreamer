@@ -8,19 +8,19 @@ ok ( my $host = Pstreamer::Host->new,
     'can Pstreamer::Host->new') || print "Bail out!\n";
 
 subtest 'Pstreamer::Host can run functions' => sub {
-    for( qw( _get_host get_filename) ) {
+    for( qw( current get_filename) ) {
         can_ok( $host, $_ );
     }
 };
 
-subtest 'Pstreamer::Host->_get_host' => sub {
-    ok( ! defined $host->_get_host,
+subtest 'Pstreamer::Host->current' => sub {
+    ok( ! defined $host->current,
         'call with no param should not succeed' );
 
-    ok( !defined $host->_get_host('http://pstream.unknown.test/'),
+    ok( !defined $host->current('http://pstream.unknown.test/'),
         'call with an unknown string should not succeed');
     
-    ok( my $h = $host->_get_host('http://sample.test/'),
+    ok( my $h = $host->current('http://sample.test/'),
         'call with a known string should succeed');
 
     isa_ok( $h, 'Pstreamer::Host::Sample',
@@ -29,7 +29,7 @@ subtest 'Pstreamer::Host->_get_host' => sub {
 
 subtest 'Pstreamer::Host->get_filename' => sub {
     ok( ! defined $host->get_filename,
-        'call with no param  should not succeed' );
+        'call with no param should not succeed' );
     
     ok( ! defined $host->get_filename('http://pstream.unknown.test/'),
         'call with an unknown url should not succeed' );
