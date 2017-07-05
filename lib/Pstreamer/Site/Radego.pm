@@ -18,11 +18,11 @@ has '+url' => (
 );
 
 has '+menu' => ( default => sub { {
-    'Accueil'       => '/cxcxds0iklm454vc54bfd87gdfs8/',
-    'A l\'affiche'  => '/cxcxds0iklm454vc54bfd87gdfs8/index.php?option=com_content&view=category&id=29&Itemid=7',
-    'Animation'     => '/cxcxds0iklm454vc54bfd87gdfs8/index.php?option=com_content&view=category&id=2&Itemid=2',
-    'Documentaires' => '/cxcxds0iklm454vc54bfd87gdfs8/index.php?option=com_content&view=category&id=26&Itemid=4',
-    'Spectacle'     => '/cxcxds0iklm454vc54bfd87gdfs8/index.php?option=com_content&view=category&id=3&Itemid=5',
+    'Accueil'       => '/',
+    'A l\'affiche'  => '/index.php?option=com_content&view=category&id=29&Itemid=7',
+    'Animation'     => '/index.php?option=com_content&view=category&id=2&Itemid=2',
+    'Documentaires' => '/index.php?option=com_content&view=category&id=26&Itemid=4',
+    'Spectacle'     => '/index.php?option=com_content&view=category&id=3&Itemid=5',
 } } );
 
 sub search {
