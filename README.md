@@ -1,13 +1,13 @@
 ## Pstreamer::App - Application de streaming vidéo
 
-    Version 0.002
+    Version 0.003
 
 ## DESCRIPTION
 
 Pstreamer permet de visionner des films ou des series,  
 en streaming, depuis un terminal. Il fonctionne sous GNU/Linux.
 
-Il se connecte à certains sites français. Perrmet de parcourir le site  
+Il se connecte à certains sites français. Permet de les parcourir  
 via les liens disponibles ou par son menu, et permet de faire des recherches.  
 Les vidéos sont lues depuis les hébergeurs avec mpv.
 
@@ -23,30 +23,30 @@ Taper le numéro de la ligne puis entrée pour continuer ou alors
 
 Les commandes du prompt disponibles sont:
 
-    :p pour précédent
-    :m pour afficher le menu du site
-    :s pour afficher les sites
-    :q pour quitter
+    :p précédent
+    :m afficher le menu du site
+    :s afficher les sites
+    :q quitter  
 
 ## OPTIONS
 
 Les options de la ligne de commande sont prioritaires  
 par rapport à celles du fichier de configuration.
 
-#### --version|-v
+### --version|-v
 
 Affiche la version.
 
-#### --fullscreen|--fs
+### --fullscreen|--fs
 
 Lance mpv en plein écran. Désactivée par défault.
 
-#### --no-fullscreen|--no-fs
+### --no-fullscreen
 
 Désactive le plein écran, si l'option est activée dans  
 fichier de configuration.
 
-#### --go
+### --go
 
 pstreamer est capable d'automatiser les entrées.
 
@@ -101,7 +101,7 @@ le souhaitez, pour paramétrer quelques propriétés ou options.
 Le format du fichier est libre, mais dépends d'un certain module.  
 Installez un des modules de la liste pour utiliser le format voulue.
 
-Liste des formats avec extensions du fichier et modules associés:
+La liste des formats:
 
     - Yaml (.yaml|.yml) :
             YAML, YAML::XS, YAML::Syck
@@ -113,8 +113,6 @@ Liste des formats avec extensions du fichier et modules associés:
             Config::General
     - INI ( .ini )
             Config::Tiny
-
-Evidemment, évitez de mettre du yaml dans un fichier .json ...
 
 Le nom du fichier doit être 'config' avec l'extension qui vous plait.  
 
@@ -143,7 +141,6 @@ Exemple d'un fichier INI:
 Note pour les cookies:  
 Pstreamer utilisera un fichier pour stocker les cookies si  
 vous activer l'option.  
-Permet de réutiliser ses cookies entre chaques sessions.  
 C'est utile pour cloudflare IMUA, mais pas encore optimisé.  
 Donc l'option n'est pas disponible pour la ligne de commande.  
 
@@ -160,7 +157,7 @@ Pour installer pstreamer, exécutez:
 
 Si vous avez une installation locale de perl.  
 Vous pouvez installer depuis le répertoire en utilisant cpanm,  
-qui installera les dépendances en même temps :
+qui installera les dépendances :
 
     $ cpanm .
 
@@ -179,7 +176,7 @@ Après installation, vous pouvez trouver la documentation avec la commande:
 
 ## DEPENDENCES
 
-#### Modules perl requis:
+### Modules perl requis:
 
 - Moo
 - utf8::all
@@ -199,7 +196,7 @@ Après installation, vous pouvez trouver la documentation avec la commande:
 - Regexp::Common
 - Try::Tiny
 
-#### Programmes externes requis:
+### Programmes externes requis:
 
 - mpv, [https://mpv.io/](https://mpv.io/)
 - phantomjs, [http://phantomjs.org/](http://phantomjs.org/)
