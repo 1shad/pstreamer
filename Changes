@@ -1,5 +1,10 @@
 Revision history for pstreamer
 
+0.003   Wed, 05 Jul 2017
+        * Prise en charge des redirections lorsqu'un site change d'url
+        * Ajouts de quelques alias pour quitter le programme
+        * Réusinage de code
+
 0.002   Sun, 02 Jul 2017
         * Ajouts des tests
         * Utilisation d'un fichier de configuration
