@@ -7,31 +7,59 @@ package Pstreamer::Role::Site;
 =cut
 
 use Mojo::URL;
-use Pstreamer::Config;
 use Moo::Role;
+
+requires qw(search get_results);
 
 has params => ( is => 'rw', default => undef );
 
-requires qw(url menu search get_results);
+has url => (
+    is => 'rw',
+    default => '/',
+    coerce => sub {
+        my $url = shift;
+        $url ? Mojo::URL->new( $url ) : undef ;
+    },
+    trigger => 1, 
+);
 
-sub BUILD {
-    my ( $self ) = @_;
-    
-    $self->{url} = Mojo::URL->new( $self->{url} );
-    
-    my $menu = $self->{menu};
-    $self->{menu} = [ map { {
-        name => $_,
-        url  => Mojo::URL->new($menu->{$_})->to_abs($self->url),
-    } } sort keys %{$menu} ];
+has menu => (
+    is => 'ro',
+    default => sub { { Home => '/' } },
+    coerce => sub {
+        my $menu = shift;
+        return undef unless $menu;
+        return [ map { {
+            name => $_,
+            url  => Mojo::URL->new( $menu->{$_} ),
+        } } sort keys %{$menu} ];
+    },
+);
 
+# populate the menu urls.
+sub _trigger_url {
+    my ( $self, $url ) = @_;
+    return undef unless $url and $url->is_abs;
+    
+    foreach my $menu ( @{$self->menu} ) {
+        if ( ! $menu->{url}->is_abs and @{$url->path->parts} ) {
+            $menu->{url}->path->merge( $url->path );
+        }
+        $menu->{url} = $menu->{url}->to_abs( $url );
+        $menu->{url} = $menu->{url}->scheme( $url->scheme );
+        $menu->{url} = $menu->{url}->host( $url->host );
+    }
+    return 1;
+}
+
+# need it one time after object creation
+sub _init {
+    my $self = shift;
+    $self->_trigger_url( $self->url );
+    return $self;
 }
 
 1;
-
-=head1 TODO
-
- Don't use BUILD ...
 
 =head1 SEE ALSO
 
