@@ -41,46 +41,36 @@ my %hosters = (
 
 ########################################
 # Choose the host via the url.
-# Loads the package unless it is loaded.
-# Returns the created object,
-# or undef if the host is not found.
 #
-sub _get_host {
-    my ( $self, $url ) = @_;
-    my $host = undef;
-    
-    return undef unless defined $url;
+has current => (
+    is => 'rw',
+    default => undef,
+    coerce => sub {
+        my $url = shift;
+        my $host;
+        return undef unless defined $url;
 
-    for my $key ( keys %hosters ) {
-        $host = $hosters{$key} if $url =~ /\Q$key\E/;
-    }
-    
-    return undef unless defined $host;
+        for my $key ( keys %hosters ) {
+            $host = $hosters{$key} if $url =~ /\Q$key\E/;
+        }    
+        return undef unless defined $host;
 
-    unless ( Class::Inspector->loaded( $host ) ) {
-        eval "require $host";
-        confess $@ if $@;
-    }
+        unless ( Class::Inspector->loaded( $host ) ) {
+            eval "require $host";
+            confess $@ if $@;
+        }
+        $host->new;
+    },
+    handles => ['get_filename'],
+);
 
-    $host = $host->new;
-
-    return $host;
-}
-
-########################################
-# Calls the host get_filename
-# and returns its value.
-# Returns undef if no host.
-#
-sub get_filename {
-    my ( $self, $url ) = @_;
-    my $host = undef ;
-
-    $host = $self->_get_host($url);
-    
-    #print "$url\n" unless defined $host;
-    return defined $host ? $host->get_filename($url) : undef ;
-}
+around get_filename => sub {
+    my $origin = shift;
+    my $self = shift;
+    return undef unless @_;
+    return $origin->( $self, @_) if $self->current(@_);
+    return undef;
+};
 
 1;
 
