@@ -48,6 +48,7 @@ t/01-config.t
 t/02-site.t
 t/03-host.t
 t/04-viewer.t
+t/05-app.t
 t/10-radego.t
 t/11-librestream.t
 t/12-sokrostream.t
