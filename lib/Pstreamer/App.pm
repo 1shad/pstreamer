@@ -260,7 +260,7 @@ sub _proceed_search {
     my @choices;
     return undef unless $self->site->current;
 
-    $self->_add_history( $self->tx->req->url ) if $self->tx;
+    $self->history( $self->tx->req->url ) if $self->tx;
     $self->tx( $self->site->search($line) );
     @choices = $self->site->get_results($self->tx);
 
