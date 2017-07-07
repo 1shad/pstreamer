@@ -18,7 +18,7 @@ use utf8;
 use feature 'say';
 use Try::Tiny;
 use Term::ANSIColor 'colored';
-use Scalar::Util qw(looks_like_number refaddr);
+use Scalar::Util qw(looks_like_number refaddr reftype);
 use Pstreamer::Util::CloudFlare;
 use Pstreamer::Viewer;
 use Pstreamer::Host;
@@ -26,10 +26,6 @@ use Pstreamer::Site;
 use Pstreamer::Config;
 use Moo;
 use MooX::Options description => 'perldoc Pstreamer::App pour les détails';
-
-has [qw(config ua tx stash term viewer host site cf command history)] => (
-    is => 'rw',
-);
 
 option go => (
     is => 'ro',
@@ -52,8 +48,27 @@ option version => (
     doc => 'Affiche la version',
 );
 
+has [qw(config ua tx stash term viewer host site cf command)] => (
+    is => 'rw',
+);
+
+# LIFO
+has history => (
+    is => 'ro',
+    default => sub { [] },
+);
+
+around history => sub {
+    my $origin = shift;
+    my $self = shift;
+    return shift @{$self->$origin} unless @_;
+    unshift( @{$self->$origin}, grep { defined } reverse @_ );
+    return $self->$origin;
+};
+
 before run => sub { shift->_init };
 
+# creates objects and vars
 sub _init {
     my $self = shift;
 
@@ -70,12 +85,12 @@ sub _init {
     $self->cf( Pstreamer::Util::CloudFlare->new );
     $self->ua( $self->config->ua );
     $self->term( $self->config->term );
-    $self->history( [] ); # LIFO
     $self->command( [qw(:quit :s :p :m)] );
     $self->term->addhistory( $_ ) for @{$self->command};
     push @{$self->command}, qw(:q q :exit);
 }
 
+# the program loop
 sub run {
     my $self = shift;
     my ( @choices, @tmp, $line );
@@ -127,20 +142,29 @@ sub run {
     }
 }
 
+# formats and prints the array of choices
 sub _print_choices {
     my ( $self, @choices ) = @_;
     my $count = 0;
+    
+    @choices = grep {
+        defined
+        and refaddr($_)
+        and reftype($_) eq reftype {}
+        and $_->{name}
+    } @choices;
 
     foreach  ( @choices ) {
         say ($count>9?"":" ",colored($count++ ,'bold'),": ",$_->{name});
     }
 }
 
+# processes the choosen command by the user
 sub _proceed_command {
     my ( $self, $line ) = @_;
     my ( $previous, @choices );
-
-    #exit if $line eq ":q";
+    
+    $line =~ s/\s*([^\s]*)\s*.*/$1/;
     exit if $line =~ /^(:q|q|:quit|:exit)$/;
 
     if ( $line eq ":s" ) {
@@ -151,7 +175,7 @@ sub _proceed_command {
         @choices = @{$self->site->menu};
     }
     elsif ( $line eq ":p"){
-        $previous = $self->_get_history;
+        $previous = $self->history;
         return $self->site->current(undef) unless $previous;
         $self->tx( $self->_get($previous) );
         @choices = $self->site->get_results($self->tx);
@@ -159,10 +183,16 @@ sub _proceed_command {
     return @choices;
 }
 
+# processes the selected line by the user
 sub _proceed_line {
     my ( $self, $element ) = @_;
     my @choices;
 
+    return undef unless $element 
+        and refaddr( $element )
+        and reftype( $element ) eq reftype {}
+        and $element->{url};
+    
     for( $element ) {
         if( $_->{url} =~ /^PICO$/ ) { # site choice
             $self->site->current( $_->{name} );
@@ -179,7 +209,7 @@ sub _proceed_line {
             if ( defined $_->{params} ) {
                 $self->site->current->params($_->{params});
             } else {
-                $self->_add_history( $self->tx->req->url );
+                $self->history( $self->tx->req->url );
                 $self->tx( $self->_get( $_->{url} ) );
             }
         }
@@ -202,9 +232,12 @@ sub _proceed_line {
     return @choices;
 }
 
+# processes hosts urls
 sub _proceed_host {
     my ( $self, $url ) = @_;
-    my $res = $self->host->get_filename( $_->{url} );
+    return undef unless $url;
+    
+    my $res = $self->host->get_filename( $url );
 
     if ( $res and !refaddr( $res ) ) {
         $res = [{ url => $res, stream => 1 }];
@@ -221,9 +254,11 @@ sub _proceed_host {
     return $res;
 }
 
+# processes search text written by the user
 sub _proceed_search {
     my ( $self, $line ) = @_;
     my @choices;
+    return undef unless $self->site->current;
 
     $self->_add_history( $self->tx->req->url ) if $self->tx;
     $self->tx( $self->site->search($line) );
@@ -232,6 +267,7 @@ sub _proceed_search {
     return @choices;
 }
 
+# get url with Mojo::UserAgent and bypass cloudflare IMUA if it is active
 sub _get {
     my ( $self, $url ) = @_;
     my $tx;
@@ -246,12 +282,18 @@ sub _get {
     return $tx;
 }
 
+# returns true or false if the param is a command or not
 sub _is_command {
     my ( $self, $line ) = @_;
+    return undef unless $line;
+    
+    $line =~ s/\s*([^\s]*)\s*.*/$1/;
+    
     my $commands = join '|', @{$self->command};
     return  $line =~ /^($commands)$/;
 }
 
+# Returns true or false if link is internal to the site or not
 sub _is_internal {
     my $self = shift;
     my $link = shift;
@@ -265,17 +307,6 @@ sub _is_internal {
     return 0 unless $link =~ /\Q$host/;
 
     return 1;
-}
-
-sub _add_history {
-    my ( $self, $e ) = @_;
-    unshift @{$self->history}, $e;
-}
-
-sub _get_history {
-    my $self = shift;
-    my $e = shift @{$self->history};
-    return $e;
 }
 
 1;
