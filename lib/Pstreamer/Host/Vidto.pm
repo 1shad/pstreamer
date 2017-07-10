@@ -34,11 +34,12 @@ sub get_filename {
     ($js) = $dom =~ /(eval\(function\(p,a,c,k,e(?:.|\s)+?\))\n?<\/script>/;
     
     if ($js) {
-        print "-- javascrit found --\nurl: $url\n";
         $js = Pstreamer::Util::Unpacker->new( packed => \$js )->unpack;
-        ($file) = $js =~ /,file:"([^"]+)"}/;
+        ($file) = $js =~ /,\{?file:"([^"]+)"}/;
+        ($file) = $js =~ /{file:\s*"([^"]+(?<!smil))"}/ if ! $file;
     } else {
         ($file) = $dom =~ /{file:"([^"]+)",label:"(\d+p)"}/;
+        ($file) = $dom =~ /{file:\s*"([^"]+(?<!smil))"}/ if ! $file;
     }
     
     return $file?$file:0;
@@ -46,7 +47,7 @@ sub get_filename {
 
 sub _set_url {
     my ( $self, $url ) = @_;
-    $url =~ s/embed-([^-]+).*/$1/;
+    $url =~ s/embed-([^-.]+).*/$1/;
     return $url;
 }
 
@@ -62,6 +63,10 @@ sub _wait {
 }
 
 1;
+
+=head1 DESCRIPTION
+
+ Handles Vidto and Vidtodo. Actually Vidto seems down.
 
 =head1 INSPIRED BY
 
