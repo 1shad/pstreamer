@@ -8,11 +8,11 @@ Pstreamer::App - Application de streaming vidéo
 
 =head1 VERSION
 
- Version 0.003
+ Version 0.004
 
 =cut
 
-our $VERSION = '0.003';
+our $VERSION = '0.004';
 
 use utf8;
 use feature 'say';
@@ -38,7 +38,7 @@ option go => (
 option fullscreen => (
     is => 'ro',
     short => 'fs',
-    negatable => 1,
+    negativable => 1,
     doc => 'Videos en plein ecran',
 );
 
@@ -85,7 +85,7 @@ sub _init {
     $self->cf( Pstreamer::Util::CloudFlare->new );
     $self->ua( $self->config->ua );
     $self->term( $self->config->term );
-    $self->command( [qw(:quit :s :p :m)] );
+    $self->command( [qw(:quit :h :s :p :m)] );
     $self->term->addhistory( $_ ) for @{$self->command};
     push @{$self->command}, qw(:q q :exit);
 }
@@ -94,6 +94,7 @@ sub _init {
 sub run {
     my $self = shift;
     my ( @choices, @tmp, $line );
+    my $one_choice_str = '';
 
     if ( $self->version ) {
         say "\nThis is Pstreamer::App version $VERSION\n";
@@ -106,17 +107,26 @@ sub run {
         @choices = $self->site->get_sites unless $self->site->current;
 
         # if only one host or stream url, it doesn't show the menu
-        if ( @choices == 1 && ! $self->_is_internal( $choices[0]->{url} ) ){
-            $line = 0;
+        if ( @choices == 1 and ! $self->_is_internal( $choices[0]->{url} ) ) {
+            # breaks recursion if any
+            if ( $one_choice_str =~ /$choices[0]->{url}/ ){
+                $line = ':p';
+                $one_choice_str = "";
+            } else {
+                $line = 0;
+                $one_choice_str .= $choices[0]->{url};
+            }
         }
         elsif ( @{$self->go} ) {
             $line = shift @{$self->go};
+            say $self->stash and $self->stash(undef) if $self->stash;
             if ( $line eq 'print') {
                 $self->_print_choices( @choices ) if $line eq 'print';
                 $line = shift @{$self->go} // ':q';
             }
         }
         else { # get user input
+            $one_choice_str = ''; # assures that it is empty
             $self->_print_choices( @choices );
             if ( $self->stash ) {
                 say colored( $self->stash, 'red' );
@@ -137,7 +147,7 @@ sub run {
         else {
             @tmp = $self->_proceed_search($line);
         }
-        $self->stash( 'Aucun résultat') unless @tmp;
+        $self->stash( 'Aucun résultat') unless @tmp or $line eq ':h';
         @choices = @tmp if @tmp;
     }
 }
@@ -154,9 +164,11 @@ sub _print_choices {
         and $_->{name}
     } @choices;
 
-    foreach  ( @choices ) {
-        say ($count>9?"":" ",colored($count++ ,'bold'),": ",$_->{name});
-    }
+    @choices = map {
+        join '', ($count>9?"":" ",colored($count++ ,'bold'),": ",$_->{name});
+    } @choices;
+
+    say join "\n", @choices if @choices;
 }
 
 # processes the choosen command by the user
@@ -179,7 +191,10 @@ sub _proceed_command {
         return $self->site->current(undef) unless $previous;
         $self->tx( $self->_get($previous) );
         @choices = $self->site->get_results($self->tx);
+    } else {
+        $self->_help;
     }
+
     return @choices;
 }
 
@@ -309,6 +324,22 @@ sub _is_internal {
     return 1;
 }
 
+# prints help
+sub _help {
+    my $self = shift;
+    my @text;
+
+    push @text, "[Recherche]";
+    push @text, "taper un texte puis Entrée";
+    push @text, "\n[Commandes]";
+    push @text, ":s\t: Afficher les sites";
+    push @text, ":m\t: Afficher le menu du site";
+    push @text, ":p\t: Précedent";
+    push @text, ":q\t: Quitter le programme. alias: q, :quit, :exit\n";
+    say  join "\n", @text;
+    $self->term->readline('Appuyer sur Entrée pour continuer');
+}
+
 1;
 
 =head1 DESCRIPTION
@@ -335,7 +366,8 @@ Les commandes du prompt disponibles sont:
     :p précédent
     :m afficher le menu du site
     :s afficher les sites
-    :q quitter  
+    :q quitter
+    :h aide  
 
 =head1 OPTIONS
 
@@ -457,6 +489,66 @@ L'emplacement du fichier est pour l'instant:
 
     $HOME/.config/pstreamer/cookies/
 
+=head1 DEPENDENCES
+
+=head2 Modules perl requis:
+
+=over
+
+=item Moo
+
+=item utf8::all
+
+=item Mojolicious
+
+=item IO::Socket::SSL
+
+=item MooX::Singleton
+
+=item MooX::Options
+
+=item MooX::ConfigFromFile
+
+=item Class::Inspector
+
+=item Term::ReadLine::Gnu
+
+=item File::HomeDir
+
+=item Data::Record
+
+=item Regexp::Common
+
+=item Try::Tiny
+
+=back
+
+=head2 Modules perl recommandés:
+
+=over
+
+=item WWW::Mechanize::PhantomJS
+
+=item Config::Tiny
+
+=back
+
+=head2 Programme externe requis:
+
+=over
+
+=item mpv, L<https://mpv.io/>
+
+=back
+
+=head2 Programme externe recommandé:
+
+=over
+
+=item phantomjs, L<http://phantomjs.org/>
+
+=back
+
 =head1 INSTALLATION
 
 Pour installer pstreamer, exécutez:
@@ -470,74 +562,85 @@ qui installera les dépendances :
 
     $ cpanm .
 
-Sinon, installez les dépendances puis :
+Sinon, installez les dépendances, avec par exemple pour debian :
+
+    $ apt-get install libmoo-perl libutf8-all-perl libmojolicious-perl \
+    libio-socket-ssl-perl libmoox-singleton-perl libmoox-options-perl \
+    libmoox-configfromfile-perl libclass-inspector-perl libfile-homedir-perl \
+    libtry-tiny-perl libdata-record-perl libregexp-common-perl \
+    libterm-readline-gnu-perl libconfig-tiny-perl
+
+Et ensuite depuis le répertoire :
 
     $ perl Makefile.PL
     $ make
     $ make test
-    $ make install (sudo make install si pas de copie locale de perl)
+    $ sudo make install
+
+=head1 MISES A JOUR
+
+Si vous avez gardé le répertoire d'installation du dessus :
+
+    $ cd /chemin/pstreamer
+    $ git pull
+
+Ensuite comme pour l'installation :
+
+    $ cpanm .
+    ou
+    $ Perl Makefile.PL
+    $ make && make test
+    $ sudo make install
+
+Si vous n'avez pas gardé le répertoire :
+
+    Comme pour l'installation sans les dépendances.
+
+=head1 INSTALLATION DE WWW::Mechanize::PhantomJS
+
+Déja, phantomjs n'est utilisé que pour l'hebergeur openload.  
+Comme il n'y a pas de paquet pour l'installer il faut le faire avec cpanm.
+
+Si vous souhaitez l'installer, voilà la procédure :
+
+Installez Object::Import :
+
+    $ cpanm Object::Import
+
+Ca échoue,  
+Alors comme indiqué dans ce patch:  
+L<http://cpan.cpantesters.org/authors/id/S/SR/SREZIC/patches/Object-Import-1.004-RT106769.patch>  
+Il faut modifier un fichier: 
+
+    $ cd ~/.cpanm/latest-build/Object-Import-1.004
+
+Editez le fichier t/04_handle.t avec par exemple:
+
+    $ vim t/04_handle.t
+
+et remplacez la ligne 10 (qui utilise une vieille syntaxe) par:  
+
+    my($TT, $tn) = tempfile(UNLINK => 1);  
+
+sauvegardez puis installez le depuis ce répertoire:
+
+    $ cpanm .
+    $ cd
+
+Ensuite installez le module :
+
+    $ cpanm WWW::Mechanize::PhantomJS
+
+Puis le programme phantomjs, depuis le site ou avec votre gestionnaire de paquets.  
+avec par exemple pour debian:
+
+    $ apt-get install phantomjs
 
 =head1 DOCUMENTATION
 
 Après installation, vous pouvez trouver la documentation avec la commande:
 
     $ perldoc Pstreamer::App
-
-=head1 DEPENDENCES
-
-=head2 Modules perl requis:
-
-=over
-
-=item Moo
-
-=item utf8::all
-
-=item Mojolicious
-
-=item WWW::Mechanize::PhantomJS
-
-=item MooX::Singleton
-
-=item MooX::Options
-
-=item MooX::ConfigFromFile
-
-=item Class::Inspector
-
-=item Term::ANSIColor
-
-=item Term::ReadLine::Gnu
-
-=item Scalar::Util
-
-=item File::Spec
-
-=item File::HomeDir
-
-=item File::Basename
-
-=item Data::Record
-
-=item Regexp::Common
-
-=item Try::Tiny
-
-=back
-
-=head2 Programmes externes requis:
-
-=over
-
-=item mpv, L<https://mpv.io/>
-
-=item phantomjs, L<http://phantomjs.org/>
-
-=back
-
-Pour phantomjs, il est recommandé de télécharger la version depuis le site  
-plutôt que de l'installer avec votre gestionnaire de paquets.  
-Ensuite, faites en sorte que l'exécutable soit dans votre PATH.
 
 =head1 BUGS
 
