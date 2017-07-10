@@ -6,11 +6,29 @@ package Pstreamer::Host::Openload;
 
 =cut
 
-use WWW::Mechanize::PhantomJS;
 use Mojo::DOM;
+use Class::Inspector;
+use IPC::Cmd 'can_run';
 use Moo;
 
 with 'Pstreamer::Role::UA';
+
+around get_filename => sub {
+    my $origin = shift;
+    my $phantom = 'WWW::Mechanize::PhantomJS';
+
+    unless( Class::Inspector->loaded( $phantom ) ) {
+        eval "require $phantom";
+        print "Please install $phantom\n" and return undef if $@;
+    }
+    
+    unless( can_run('phantomjs') ) {
+        print "Can't run phantomjs\n";
+        return undef;
+    }
+    
+    return $origin->( @_ );
+};
 
 sub get_filename {
     my ( $self, $url ) = @_;
