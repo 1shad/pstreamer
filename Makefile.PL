@@ -20,17 +20,15 @@ WriteMakefile(
     },
     BUILD_REQUIRES => {
         'Test::More'     => '0',
-        'Test::Output'     => '0',
+        'Test::Output'   => '0',
     },
     PREREQ_PM => {
-        #'ABC'              => '1.6',
-        #'Foo::Bar::Module' => '5.0401',
         'Moo'                       => '0',
         'utf8::all'                 => '0',
         'Mojolicious'               => '0',
-        'WWW::Mechanize::PhantomJS' => '0',
+        'IO::Socket::SSL'           => '0',
         'MooX::Singleton'           => '0',
-        'MooX::Options'             => '4.100',
+        'MooX::Options'             => '0',
         'MooX::ConfigFromFile'      => '0',
         'Class::Inspector'          => '0',
         'Term::ANSIColor'           => '0',
@@ -42,7 +40,6 @@ WriteMakefile(
         'Try::Tiny'                 => '0',
         'Data::Record'              => '0',
         'Regexp::Common'            => '0',
-        #Recommends
         'Term::ReadLine::Gnu'       => '0',
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
