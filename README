@@ -2,7 +2,7 @@ NAME
     Pstreamer::App - Application de streaming vidéo
 
 VERSION
-     Version 0.003
+     Version 0.004
 
 DESCRIPTION
     Pstreamer permet de visionner des films ou des series, en streaming,
@@ -27,6 +27,7 @@ UTILISATION
         :m afficher le menu du site
         :s afficher les sites
         :q quitter
+        :h aide
 
 OPTIONS
     Les options de la ligne de commande sont prioritaires par rapport à
@@ -142,6 +143,32 @@ CONFIGURATION
 
         $HOME/.config/pstreamer/cookies/
 
+DEPENDENCES
+  Modules perl requis:
+    Moo
+    utf8::all
+    Mojolicious
+    IO::Socket::SSL
+    MooX::Singleton
+    MooX::Options
+    MooX::ConfigFromFile
+    Class::Inspector
+    Term::ReadLine::Gnu
+    File::HomeDir
+    Data::Record
+    Regexp::Common
+    Try::Tiny
+
+  Modules perl recommandés:
+    WWW::Mechanize::PhantomJS
+    Config::Tiny
+
+  Programme externe requis:
+    mpv, <https://mpv.io/>
+
+  Programme externe recommandé:
+    phantomjs, <http://phantomjs.org/>
+
 INSTALLATION
     Pour installer pstreamer, exécutez:
 
@@ -154,46 +181,82 @@ INSTALLATION
 
         $ cpanm .
 
-    Sinon, installez les dépendances puis :
+    Sinon, installez les dépendances, avec par exemple pour debian :
+
+        $ apt-get install libmoo-perl libutf8-all-perl libmojolicious-perl \
+        libio-socket-ssl-perl libmoox-singleton-perl libmoox-options-perl \
+        libmoox-configfromfile-perl libclass-inspector-perl libfile-homedir-perl \
+        libtry-tiny-perl libdata-record-perl libregexp-common-perl \
+        libterm-readline-gnu-perl libconfig-tiny-perl
+
+    Et ensuite depuis le répertoire :
 
         $ perl Makefile.PL
         $ make
         $ make test
-        $ make install (sudo make install si pas de copie locale de perl)
+        $ sudo make install
+
+MISES A JOUR
+    Si vous avez gardé le répertoire d'installation du dessus :
+
+        $ cd /chemin/pstreamer
+        $ git pull
+
+    Ensuite comme pour l'installation :
+
+        $ cpanm .
+        ou
+        $ Perl Makefile.PL
+        $ make && make test
+        $ sudo make install
+
+    Si vous n'avez pas gardé le répertoire :
+
+        Comme pour l'installation sans les dépendances.
+
+INSTALLATION DE WWW::Mechanize::PhantomJS
+    Déja, phantomjs n'est utilisé que pour l'hebergeur openload. Comme il
+    n'y a pas de paquet pour l'installer il faut le faire avec cpanm.
+
+    Si vous souhaitez l'installer, voilà la procédure :
+
+    Installez Object::Import :
+
+        $ cpanm Object::Import
+
+    Ca échoue, Alors comme indiqué dans ce patch:
+    <http://cpan.cpantesters.org/authors/id/S/SR/SREZIC/patches/Object-Impor
+    t-1.004-RT106769.patch> Il faut modifier un fichier:
+
+        $ cd ~/.cpanm/latest-build/Object-Import-1.004
+
+    Editez le fichier t/04_handle.t avec par exemple:
+
+        $ vim t/04_handle.t
+
+    et remplacez la ligne 10 (qui utilise une vieille syntaxe) par:
+
+        my($TT, $tn) = tempfile(UNLINK => 1);
+
+    sauvegardez puis installez le depuis ce répertoire:
+
+        $ cpanm .
+        $ cd
+
+    Ensuite installez le module :
+
+        $ cpanm WWW::Mechanize::PhantomJS
+
+    Puis le programme phantomjs, depuis le site ou avec votre gestionnaire
+    de paquets. avec par exemple pour debian:
+
+        $ apt-get install phantomjs
 
 DOCUMENTATION
     Après installation, vous pouvez trouver la documentation avec la
     commande:
 
         $ perldoc Pstreamer::App
-
-DEPENDENCES
-  Modules perl requis:
-    Moo
-    utf8::all
-    Mojolicious
-    WWW::Mechanize::PhantomJS
-    MooX::Singleton
-    MooX::Options
-    MooX::ConfigFromFile
-    Class::Inspector
-    Term::ANSIColor
-    Term::ReadLine::Gnu
-    Scalar::Util
-    File::Spec
-    File::HomeDir
-    File::Basename
-    Data::Record
-    Regexp::Common
-    Try::Tiny
-
-  Programmes externes requis:
-    mpv, <https://mpv.io/>
-    phantomjs, <http://phantomjs.org/>
-
-    Pour phantomjs, il est recommandé de télécharger la version depuis le
-    site plutôt que de l'installer avec votre gestionnaire de paquets.
-    Ensuite, faites en sorte que l'exécutable soit dans votre PATH.
 
 BUGS
     Veuillez signaler tout bugs ou demandes de fonctionnalités via
