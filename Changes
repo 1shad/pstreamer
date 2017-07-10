@@ -1,5 +1,13 @@
 Revision history for pstreamer
 
+0.004   Mon, 10 Jul 2017
+        * WWW::Mechanize::PhantomJS n'est plus requis pour l'installation
+        * Ajout de IO::Socket::SSL dans Makefile.PL, qui manquait
+          pour l'installation
+        * Fix d'un bug qui provoquait une récursion quand il y avait
+          qu'un seul host et qu'une seule qualité
+        * Ajout de la commande :h
+
 0.003   Wed, 05 Jul 2017
         * Prise en charge des redirections lorsqu'un site change d'url
         * Ajouts de quelques alias pour quitter le programme
