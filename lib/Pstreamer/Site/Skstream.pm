@@ -9,6 +9,7 @@ package Pstreamer::Site::Skstream;
 use Mojo::URL;
 use Mojo::Util 'trim';
 use Mojo::JSON 'decode_json';
+use Pstreamer::Util::Unpacker;
 use Moo;
 
 with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
@@ -40,7 +41,7 @@ sub get_results {
         elsif ( /(#.+)$/ ) {
             @results = $self->_get_episodes( $dom, $1 );
         }
-        elsif ( /series.+|mangas.+/ ) {
+        elsif ( /series.+|mangas.+/ and !/\/page\// ) {
             @results = $self->_get_seasons( $dom, $_ );
         }
         else {
@@ -131,9 +132,10 @@ sub _get_hosters_links {
 
 sub _get_dl_protect {
     my ( $self, $item, $headers ) = @_;
-    my ( $tx , $res );
+    my ( $tx , $res, $JsU );
 
     $res = [];
+    $JsU = Pstreamer::Util::Unpacker->new;
 
     $tx = $self->ua->head( $item->{url} => $headers );
     
@@ -163,6 +165,19 @@ sub _get_dl_protect {
                 stream => 1,
             } } @$json ];
 
+        }
+        # case javascript packer
+        elsif ( my ($p) = 
+            $tx->res->dom =~ /(eval\(function\(p,a,c,k,e(?:.|\s)+?\))\n?<\/script>/ ) {
+            if ( Pstreamer::Util::Unpacker::is_valid( \$p ) ) {
+                $JsU->packed( \$p );
+                $p = $JsU->unpack;
+                $p =~ s/.*src='([^']+).*/$1/;
+                $res = [ {
+                    url  => $p,
+                    name => $item->{name},
+                } ];
+            }
         }
         else {
             warn 'unknown method dl-protect';
