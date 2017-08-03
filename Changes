@@ -1,5 +1,9 @@
 Revision history for pstreamer
 
+0.005   Thu, 03 Aug 2017
+        * Update de sktream
+        * Update de google drive 
+
 0.004   Mon, 10 Jul 2017
         * WWW::Mechanize::PhantomJS n'est plus requis pour l'installation
         * Ajout de IO::Socket::SSL dans Makefile.PL, qui manquait
