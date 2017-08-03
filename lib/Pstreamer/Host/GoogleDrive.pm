@@ -82,11 +82,13 @@ sub get_filename {
 }
 
 sub _set_url {
-    my ( $self, $url, $id ) = @_;
-
-    ($id) = $url =~ /docid=([\w-]+)/;
-    $url = 'https://drive.google.com/file/d/'.$id.'/view';
-
+    my ( $self, $url ) = @_;
+    
+    if ( $url =~ /docid=([\w-]+)/ ) {
+        $url = 'https://drive.google.com/file/d/'.$1.'/view';
+    }
+    
+    $url =~ s/preview/view/;
     return $url;
 }
 
