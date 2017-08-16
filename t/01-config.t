@@ -14,9 +14,9 @@ subtest 'Pstreamer::Config->ua' => sub {
         '... and isa should be ok' );
 };
 
-subtest 'Pstreamer::Config->term' => sub {
-    ok( defined $config->term, 'should be defined' );
-    isa_ok( $config->term, 'Term::ReadLine',
+subtest 'Pstreamer::Config->ui' => sub {
+    ok( defined $config->ui, 'should be defined' );
+    isa_ok( $config->ui, 'Pstreamer::UI::Text',
         '... and isa should be ok' );
 };
 
