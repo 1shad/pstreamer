@@ -2,11 +2,11 @@ NAME
     Pstreamer::App - Application de streaming vidéo
 
 VERSION
-     Version 0.005
+     Version 0.006
 
 DESCRIPTION
     Pstreamer permet de visionner des films ou des series, en streaming,
-    depuis un terminal. Il fonctionne sous GNU/Linux.
+    depuis un terminal, sur un système de type Unix.
 
     Il se connecte à certains sites français. Permet de les parcourir via
     les liens disponibles ou par son menu, et permet de faire des
@@ -17,6 +17,11 @@ UTILISATION
 
         $ pstreamer
 
+INTERFACES
+    Il y a deux interfaces disponibles: 'text' et 'ncurses'. L'interface
+    text est utilisée par défault.
+
+  TEXT
     Le programme affiche les liens avec des numéros en début de ligne. Taper
     le numéro de la ligne puis entrée pour continuer ou alors écrire un
     texte pour lancer une recherche.
@@ -29,6 +34,26 @@ UTILISATION
         :q quitter
         :h aide
 
+  NCURSES
+    Le programme affiche les liens disponible. Selectionner le lien en
+    descandant ou en montant avec les flèches du clavier bas et haut, ou
+    avec les touches 'k' et 'j', puis valider avec la touche entrer ou
+    fleche droite ou 'l'. Revenir en arrière avec les touches flèche gauche
+    ou 'h'.
+
+    Voici la liste des racourcis:
+
+        'j', 'bas'    : descendre dans la liste
+        'k', 'haut'   : monter dans la liste
+        'h', 'gauche' : precedant
+        'l', 'droite' : suivant
+
+        's' : menu selection d'un site
+        'm' : menu du site (inactif si aucun site n'est selectionner)
+        '>' : recherche
+
+        Control-q : quitter
+
 OPTIONS
     Les options de la ligne de commande sont prioritaires par rapport à
     celles du fichier de configuration.
@@ -40,61 +65,82 @@ OPTIONS
     Lance mpv en plein écran. Désactivée par défault.
 
   --no-fullscreen
-    Désactive le plein écran, si l'option est activée dans fichier de
+    Désactive le plein écran, si l'option est activée dans le fichier de
+    configuration.
+
+  --ncurses
+    Active l'interface ncurses
+
+  --no-ncurses
+    Désactive l'interface ncurses si l'option est activée dans le fichier de
     configuration.
 
   --go
-    pstreamer est capable d'automatiser les entrées.
+    Cette option n'est disponible que avec l'interface text, donc cette
+    interface est automatiquement utilisé avec.
 
-    Avec cette option, vous pouvez aller directement à la page voulue, si
-    vous connaissez d'avance les numéros et les textes que vous auriez écrit
-    en lancant le programme.
+    Elle permet d'automatiser les entrées. Le programme etant un 'bot', elle
+    est utile pour réaliser des scripts ou des alias pour faire des
+    bookmarks. Vous trouverez un exemple de script à la fin de cette
+    section.
 
-    exemple 1:
+    Les commandes utilisées sont celles de l'interface text, plus la
+    commande 'print'.
 
-        $ pstreamer  --go=2,'ma série'
+    Donc au lieu d'entrer dans le programme, puis taper 2,entrer,'ma
+    serie',entrer,0,entrer
 
-        permet de sélectionner le 3eme site, puis
-        de faire une recherche avec le texte 'ma série'.
-        pstreamer affiche les résultats, puis le prompt.
+    Vous pouvez ecrire:
 
-    exemple 2:
+        $ pstreamer --go=2,'ma série',0
 
-        $ pstreamer --fs --go=2,'ma serie',2,1,0,0,:q
+    Si vous souhaitez juste afficher les résultats, pour vérifier qu'un
+    épisode est disponible, il faut utiliser la commande 'print'.
 
-        pstreamer lance automatiquement l'épisode avec 
-        mpv en plein ecran. Il quitte juste apres mpv.
+    exemple:
 
-    exemple 3:
+        $ pstreamer --go=2,'ma serie',2,1,print
 
-        $ pstreamer --go=2,'ma serie',2,2,0,0,:p,1,0,:q
-
-        enchaine automatiquement les deux premiers épisodes
-        de 'ma serie' puis quitte.
-
-    'print' permet d'afficher les résultats.
-
-    Si vous exécutez:
-
-        $ pstreamer --go=2,'ma serie',:q
-
-    le programme quitte mais n'affiche rien.
-
-    Il faut alors entrer:
-
-        $ pstreamer --go=2,'ma serie',print
-
-    pstreamer affiche les résultats puis quitte.
+    le programme affiche les résultats puis quitte. Si vous utilisez la
+    commande ':q', le programme n'affichera pas les résultats, donc il faut
+    remplacer ':q' par 'print'.
 
     Si il n'y a rien derrière print le programme quitte, sinon il continue
     avec ce qui suit.
+
+    Voici un petit script bash à lancer avec la crontab qui permet d'alerter
+    l'utilisateur qu'un episode est disponible:
+
+        #!/bin/bash
+        export DISPLAY=:0.0         # requis pour notify-send
+        export PATH=$HOME/bin:$PATH # selon votre installation
+
+        # a omettre ou adapter selon votre installation de perl    
+        export PERL5LIB=$HOME/localperl/lib/perl5
+
+        # Comme je fais souvent un 'ls' dans mon repertoire home
+        # je ne peux pas le louper, et ca évite d'avoir plusieurs
+        # fois la nofitication.
+        if [ -f $HOME/MYSCRIPT.lock ]; then
+            exit 0;
+        fi
+
+        res=$(pstreamer --go=3,'game of',0,6,print|grep 'Episode 4'|wc -l)
+
+        if [ $res -gt 0 ]; then
+            notify-send "Episode dispo"
+            touch $HOME/MYSCRIPT.lock
+        fi
+
+    C'est bien sur completement inutile mais si besoin, a adapter selon
+    votre recherche et votre installation.
 
 CONFIGURATION
     Vous pouvez utiliser un fichier de configuration, si vous le souhaitez,
     pour paramétrer quelques propriétés ou options.
 
     Le format du fichier est libre, mais dépends d'un certain module.
-    Installez un des modules de la liste pour utiliser le format voulue.
+    Installez un des modules de la liste pour utiliser le format voulu.
 
     La liste des formats:
 
@@ -158,6 +204,7 @@ DEPENDENCES
     Data::Record
     Regexp::Common
     Try::Tiny
+    Curses::UI
 
   Modules perl recommandés:
     WWW::Mechanize::PhantomJS
@@ -187,7 +234,7 @@ INSTALLATION
         libio-socket-ssl-perl libmoox-singleton-perl libmoox-options-perl \
         libmoox-configfromfile-perl libclass-inspector-perl libfile-homedir-perl \
         libtry-tiny-perl libdata-record-perl libregexp-common-perl \
-        libterm-readline-gnu-perl libconfig-tiny-perl
+        libterm-readline-gnu-perl libconfig-tiny-perl libcurses-ui-perl
 
     Et ensuite depuis le répertoire :
 
@@ -195,6 +242,10 @@ INSTALLATION
         $ make
         $ make test
         $ sudo make install
+
+    NB: Veuillez installer la librairie libncursesw5-dev, si vous utilisez
+    cpanm, avant d'installer le module Curses. Sinon l'utf-8 ne sera pas
+    pris en compte.
 
 MISES A JOUR
     Si vous avez gardé le répertoire d'installation du dessus :
@@ -215,8 +266,8 @@ MISES A JOUR
         Comme pour l'installation sans les dépendances.
 
 INSTALLATION DE WWW::Mechanize::PhantomJS
-    Déja, phantomjs n'est utilisé que pour l'hebergeur openload. Comme il
-    n'y a pas de paquet pour l'installer il faut le faire avec cpanm.
+    Phantomjs n'est utilisé que pour l'hebergeur openload. Comme il n'y a
+    pas de paquet pour l'installer il faut le faire avec cpanm.
 
     Si vous souhaitez l'installer, voilà la procédure :
 
