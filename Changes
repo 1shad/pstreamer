@@ -1,5 +1,8 @@
 Revision history for pstreamer
 
+0.006   Wed, 16 Aug 2017
+        * Ajout de l'interface ncurses
+
 0.005   Thu, 03 Aug 2017
         * Update de sktream
         * Update de google drive 
