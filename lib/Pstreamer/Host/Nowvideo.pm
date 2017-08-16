@@ -26,9 +26,9 @@ sub get_filename {
     $dom = $tx->res->dom;
 
     if ( $file = $dom =~ /player.src.+?src: *'([^']+)/ ){
-        say "--- you must check Nowvideo.pm ---";
-        say "url: $url";
-        say "file: $file";
+        warn "--- you must check Nowvideo.pm ---";
+        #say "url: $url";
+        #say "file: $file";
         return 0;
     }
 
