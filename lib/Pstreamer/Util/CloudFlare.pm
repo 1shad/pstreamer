@@ -23,7 +23,8 @@ use Moo;
 my $DEBUG = 0;
 
 has tx => ( is => 'rw'); #Mojo::Transaction::HTTP
-with 'Pstreamer::Role::UA';
+
+with 'Pstreamer::Role::UA', 'Pstreamer::Role::UI';
 
 sub is_active {
     my ( $self, $tx ) = @_;
@@ -94,15 +95,12 @@ sub bypass {
     # use ->bypass(0) for non verbose.
     $verbose //= 1;
     
-    $|++;
-    while ( $t > 0 ){
-        print "Déblockage cloudflare: ".$t."s\r" if $verbose;
-        sleep(1);
-        $t--;
+    if( $verbose ) {
+        $self->wait_for( $t, "Débloquage cloudflare:");
+    } else {
+        sleep( $t );
     }
-    print ' 'x27 ."\r" if $verbose;
-    $|--;
-        
+    
     my $headers = { 'Referer' => $url->to_string };
     
     $self->ua->max_redirects( 2 );
