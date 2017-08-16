@@ -22,10 +22,10 @@ sub get_filename {
     ($file) = $dom =~ /{file: *"([^"]+(?<!smil))"/;
     if (!$file and $dom =~ /(eval\s*\(\s*function(?:.|\s)+?)<\/script>/ ){
         # let me know !
-        say "-------------------------------";
-        say "-- You must check Easyvid.pm --";
-        say "-- url: $url";
-        say "-------------------------------";
+        warn "-- You must check Easyvid.pm --";
+        #say "-------------------------------";
+        #say "-- url: $url";
+        #say "-------------------------------";
     }
     return $file?$file:0;
 }
