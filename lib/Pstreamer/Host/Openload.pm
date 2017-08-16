@@ -11,19 +11,23 @@ use Class::Inspector;
 use IPC::Cmd 'can_run';
 use Moo;
 
-with 'Pstreamer::Role::UA';
+with 'Pstreamer::Role::UA','Pstreamer::Role::UI';
 
 around get_filename => sub {
     my $origin = shift;
+    my ( $self ) = @_;  
     my $phantom = 'WWW::Mechanize::PhantomJS';
 
     unless( Class::Inspector->loaded( $phantom ) ) {
         eval "require $phantom";
-        print "Please install $phantom\n" and return undef if $@;
+        if ( $@ ) {
+            $self->error("$phantom requis");
+            return undef;
+        }
     }
     
     unless( can_run('phantomjs') ) {
-        print "Can't run phantomjs\n";
+        $self->error("Ne peut pas executer phantomjs");
         return undef;
     }
     
@@ -34,7 +38,7 @@ sub get_filename {
     my ( $self, $url ) = @_;
     my ( $dom, $file, $mech );
     
-    print "[ phantomjs ]\n";
+    $self->status("PhantomJS en cours");
     $mech = WWW::Mechanize::PhantomJS->new;
     $mech->eval_in_phantomjs(<<'JS1', $self->ua->transactor->name);
         var page = this;
