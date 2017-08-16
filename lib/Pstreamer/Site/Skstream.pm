@@ -6,13 +6,14 @@ package Pstreamer::Site::Skstream;
 
 =cut
 
+use utf8;
 use Mojo::URL;
 use Mojo::Util 'trim';
 use Mojo::JSON 'decode_json';
 use Pstreamer::Util::Unpacker;
 use Moo;
 
-with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
+with 'Pstreamer::Role::Site','Pstreamer::Role::UA','Pstreamer::Role::UI';
 
 has '+url' => ( default => 'http://www.skstream.co/' );
 
@@ -116,15 +117,13 @@ sub _get_hosters_links {
         ->each;
     
     # get urls from dl-protect
-    $|++; print "dl-protect, patience...\r";
-    
+    $self->status('Déblocage des liens');    
     @results = map {
         if ( $_->{url} =~ /dl-protect/ ) {
             @{ $self->_get_dl_protect( $_, $headers ) };
         } else { $_ }
     } @results;
 
-    print ' 'x30 ."\r"; $|--;
     #@results = grep { $_->{url} } @results;
 
     return @results;
