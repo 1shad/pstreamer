@@ -41,6 +41,8 @@ WriteMakefile(
         'Data::Record'              => '0',
         'Regexp::Common'            => '0',
         'Term::ReadLine::Gnu'       => '0',
+        'Curses'                    => '0',
+        'Curses::UI'                => '0',
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'pstreamer-*' },
