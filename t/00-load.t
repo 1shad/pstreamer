@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::More;
 
-plan tests => 38;
+plan tests => 41;
 
 BEGIN {
     use_ok( 'Pstreamer::App' ) || print "Bail out!\n";
@@ -14,6 +14,7 @@ BEGIN {
     use_ok( 'Pstreamer::Viewer' );
     
     use_ok( 'Pstreamer::Role::UA' );
+    use_ok( 'Pstreamer::Role::UI' );
     use_ok( 'Pstreamer::Role::Site' );
     
     use_ok( 'Pstreamer::Util::CloudFlare' );
@@ -50,6 +51,8 @@ BEGIN {
     use_ok( 'Pstreamer::Host::Vidabc' );
     use_ok( 'Pstreamer::Host::Watchers' );
     
+    use_ok( 'Pstreamer::UI::Text' );
+    use_ok( 'Pstreamer::UI::Curses' );
 }
 
 diag( "Testing Pstreamer::App $Pstreamer::App::VERSION, Perl $], $^X" );
