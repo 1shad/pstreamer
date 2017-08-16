@@ -9,7 +9,7 @@ package Pstreamer::Host::GoogleDrive;
 use Mojo::Util 'url_unescape';
 use Moo;
 
-with 'Pstreamer::Role::UA';
+with 'Pstreamer::Role::UA','Pstreamer::Role::UI';
 
 my %FORMATS = (
     '5'  => 'flv',
@@ -40,7 +40,7 @@ sub get_filename {
     return 0 unless $tx->success;
 
     if ( $tx->res->dom =~ /"reason"\s*,\s*"([^"]+)/ ) {
-        warn "$1";
+        $self->error($1);
         return 0;
     }
 
