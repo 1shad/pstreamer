@@ -10,7 +10,7 @@ use Pstreamer::Config;
 use IPC::Cmd qw(can_run run);
 use Moo;
 
-with 'Pstreamer::Role::UA';
+with 'Pstreamer::Role::UA', 'Pstreamer::Role::UI';
 
 has config => ( is => 'ro', default => sub {
     Pstreamer::Config->instance;
@@ -32,7 +32,7 @@ sub _player {
     my ( $mpv, $cmd, $tx, @fields );
 
     unless ( $mpv = can_run('mpv') ) {
-        warn "Can't run mpv";
+        $self->error("Ne peut pas executer mpv");
         return;
     };
 
@@ -68,9 +68,9 @@ sub _player {
     
     push( @$cmd, $file );
     
-    print "[ mpv ]\n";
+    $self->status("MPV en cours" );
     my ( $success ) = run( command => $cmd, verbose => 0 );
-    warn "Error while reading the file with mpv" unless $success;
+    $self->error("MPV ne peut pas lire cette video") unless $success;
     return $success;
 }
 
