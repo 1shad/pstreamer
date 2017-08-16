@@ -9,7 +9,7 @@ package Pstreamer::Host::Vidto;
 use Pstreamer::Util::Unpacker;
 use Moo;
 
-with 'Pstreamer::Role::UA';
+with 'Pstreamer::Role::UA', 'Pstreamer::Role::UI';
 
 sub get_filename {
     my ( $self, $url ) = @_;
@@ -26,7 +26,7 @@ sub get_filename {
     };
     $params->{referer} = $url;
     
-    $self->_wait(6); # 6s needed 
+    $self->wait_for(6, 'Patientez:'); # 6s needed 
     $tx = $self->ua->post( $url => form => $params );
     return 0 unless $tx->success;
     $dom = $tx->res->dom;
@@ -49,17 +49,6 @@ sub _set_url {
     my ( $self, $url ) = @_;
     $url =~ s/embed-([^-.]+).*/$1/;
     return $url;
-}
-
-sub _wait {
-    my ( $self, $s ) = @_;
-    $|++;
-    while ( $s > 0 ) {
-        print "patientez: ".$s--."s\r";
-        sleep(1);
-    }
-    print ' 'x15 ."\r";
-    $|--;
 }
 
 1;
