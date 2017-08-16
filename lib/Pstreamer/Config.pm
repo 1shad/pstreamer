@@ -6,11 +6,9 @@ package Pstreamer::Config;
 
 =cut
 use utf8;
-use Mojo::UserAgent;
-use Term::ReadLine;
+use Carp 'croak';
 use File::Spec;
 use File::Basename;
-use Pstreamer::Util::CookieJarFile;
 use Moo;
 use MooX::ConfigFromFile
 config_singleton  => 1,
@@ -22,7 +20,7 @@ with 'MooX::Singleton';
 
 my $CONFIG_DIR = File::Spec->catdir( $ENV{HOME}, '.config', basename($0) );
 
-has [qw(ua term)] => ( is => 'ro', lazy => 1, builder => 1 );
+has [qw(ua ui)] => ( is => 'ro', lazy => 1, builder => 1 );
 
 has user_agent => ( is => 'ro', default =>
     'Mozilla/5.0 (X11; Linux i686; rv:45.0) Gecko/20100101 Firefox/45.0'
@@ -40,18 +38,26 @@ has config_file => ( is => 'ro', default => sub {
     File::Spec->catfile( $CONFIG_DIR, 'config.ini' );
 });
 
-has [qw(cookies fullscreen)] => ( is => 'rw' );
+has [qw(cookies fullscreen ncurses)] => ( is => 'rw' );
 
+# user agent
 sub _build_ua {
     my $self = shift;
+
+    eval 'require Mojo::UserAgent';
+    croak $@ if $@;
 
     my $ua = Mojo::UserAgent->new;
     $ua->transactor->name( $self->user_agent );
     
-    $ua = $ua->cookie_jar(
-        Pstreamer::Util::CookieJarFile->new( cookies_file => $self->cookies_file )
-    ) if $self->cookies;
-    
+    if ( $self->cookies ) {
+        eval 'require Pstreamer::Util::CookieJarFile';
+        croak $@ if $@;
+        $ua = $ua->cookie_jar( Pstreamer::Util::CookieJarFile->new(
+            cookies_file => $self->cookies_file
+        ));
+    }
+
     $ua->on( start => sub {
         my ( $ua, $tx ) = @_;
         $tx->req->headers->header( Accept => $self->header_accept );
@@ -60,13 +66,21 @@ sub _build_ua {
     return $ua;
 }
 
-sub _build_term {
+# user interface
+sub _build_ui {
     my $self = shift;
+    my $ui;
 
-    my $term = Term::ReadLine->new("term.readline", \*STDIN, \*STDOUT);
-    $term->Attribs->ornaments(0);
+    if ( $self->ncurses ) {
+        $ui = 'Pstreamer::UI::Curses';
+    } else {
+        $ui = 'Pstreamer::UI::Text';
+    }
+    
+    eval "require $ui";
+    croak $@ if $@;
 
-    return $term;
+    $ui->new;
 }
 
 1;
