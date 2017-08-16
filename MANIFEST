@@ -26,6 +26,7 @@ lib/Pstreamer/Host/Vidup.pm
 lib/Pstreamer/Host/Watchers.pm
 lib/Pstreamer/Role/Site.pm
 lib/Pstreamer/Role/UA.pm
+lib/Pstreamer/Role/UI.pm
 lib/Pstreamer/Site.pm
 lib/Pstreamer/Site/LibreStream.pm
 lib/Pstreamer/Site/PapyStreaming.pm
@@ -34,6 +35,8 @@ lib/Pstreamer/Site/Sample.pm
 lib/Pstreamer/Site/Skstream.pm
 lib/Pstreamer/Site/SokroStream.pm
 lib/Pstreamer/Site/StreamingSeriescx.pm
+lib/Pstreamer/UI/Curses.pm
+lib/Pstreamer/UI/Text.pm
 lib/Pstreamer/Util/CloudFlare.pm
 lib/Pstreamer/Util/CookieJarFile.pm
 lib/Pstreamer/Util/Unpacker.pm
@@ -49,6 +52,8 @@ t/02-site.t
 t/03-host.t
 t/04-viewer.t
 t/05-app.t
+t/06-ui-text.t
+t/07-ui-curses.t
 t/10-radego.t
 t/11-librestream.t
 t/12-sokrostream.t
