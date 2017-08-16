@@ -9,7 +9,7 @@ package Pstreamer::Site::StreamingSeriescx;
 use utf8;
 use Moo;
 
-with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
+with 'Pstreamer::Role::Site','Pstreamer::Role::UA','Pstreamer::Role::UI';
 
 has '+url' => ( default => 'http://www.streaming-series.cx/' );
 
@@ -138,21 +138,15 @@ sub _bypass { # protect-stream
 
     $dom = $self->ua->get($ps)->result->dom;
     ($k) = $dom =~ /var k=\"([^<>\"]*?)\";/;
-    print "protect-stream: k non trouvé\n" and return () if !$k;
+    warn "protect-stream: k non trouvé" and return () if !$k;
     
-    $|++;
-    for ( my $i = 5; $i > 0; $i-- ){
-        print "protect-stream: ".$i."s\r";
-        sleep(1);
-    }
-    print ' 'x20 ."\r";
-    $|--;
+    $self->wait_for(5, "protect-stream:");
 
     $dom = $self->ua->post( $url => $headers => form => { k => $k })
         ->result->dom;
 
     ($k) = $dom =~ /var k=\"([^<>\"]*?)\";/;
-    print "protect-stream: lien encore protégé\n" and return () if $k;
+    warn "protect-stream: lien encore protégé" and return () if $k;
     
     $res = $dom->at('iframe');
     if ( !$res ){
