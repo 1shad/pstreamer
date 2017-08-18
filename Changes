@@ -1,5 +1,8 @@
 Revision history for pstreamer
 
+0.007   Fri, 18 Aug 2017
+        * Ajout de l'hebergeur FlashX
+
 0.006   Wed, 16 Aug 2017
         * Ajout de l'interface ncurses
 
