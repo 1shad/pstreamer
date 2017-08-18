@@ -1,6 +1,6 @@
 ## Pstreamer::App - Application de streaming vidéo
 
-    Version 0.006
+    Version 0.007
 
 ## DESCRIPTION
 
@@ -38,21 +38,21 @@ Les commandes du prompt disponibles sont:
 
 ### NCURSES
 
-Le programme affiche les liens disponible. Selectionner le lien  
-en descandant ou en montant avec les flèches du clavier bas et haut,  
-ou avec les touches 'k' et 'j', puis valider avec la touche entrer ou  
+Le programme affiche les liens disponibles. Selectionner le lien  
+en descendant ou en montant avec les flèches haut et bas du clavier,  
+ou avec les touches 'k' et 'j', puis valider avec soit la touche entrée,  
 fleche droite ou 'l'.  
-Revenir en arrière avec les touches flèche gauche ou 'h'.  
+Les touches flèche gauche ou 'h' permettent de revenir à la page précédente.  
 
 Voici la liste des racourcis:
 
     'j', 'bas'    : descendre dans la liste
     'k', 'haut'   : monter dans la liste
-    'h', 'gauche' : precedant
+    'h', 'gauche' : précédent
     'l', 'droite' : suivant
 
     's' : menu selection d'un site
-    'm' : menu du site (inactif si aucun site n'est selectionner)
+    'm' : menu du site (inactif si aucun site n'est selectionné)
     '>' : recherche
 
     Control-q : quitter
@@ -87,7 +87,7 @@ dans le fichier de configuration.
 ### --go
 
 Cette option n'est disponible que avec l'interface text,  
-donc cette interface est automatiquement utilisé avec.
+donc cette interface est automatiquement utilisée avec.
 
 Elle permet d'automatiser les entrées.  
 Le programme etant un 'bot', elle est utile pour réaliser des  
@@ -98,20 +98,20 @@ Les commandes utilisées sont celles de l'interface text, plus
 la commande 'print'.
 
 Donc au lieu d'entrer dans le programme,  
-puis taper 2,entrer,'ma serie',entrer,0,entrer
+puis taper 2,Entrée,'ma serie',Entrée,0,Entrée
 
-Vous pouvez ecrire: 
+Vous pouvez écrire: 
 
     $ pstreamer --go=2,'ma série',0
 
 Si vous souhaitez juste afficher les résultats, pour vérifier  
-qu'un épisode est disponible, il faut utiliser la commande 'print'.
+qu'un épisode est disponible ou autre, il faut utiliser la commande 'print'.
 
 exemple:
 
     $ pstreamer --go=2,'ma serie',2,1,print
 
-le programme affiche les résultats puis quitte.  
+Le programme affiche les résultats puis quitte.  
 Si vous utilisez la commande ':q', le programme  
 n'affichera pas les résultats, donc il faut remplacer ':q'  
 par 'print'.
@@ -120,7 +120,7 @@ Si il n'y a rien derrière print le programme quitte,
 sinon il continue avec ce qui suit.
 
 Voici un petit script bash à lancer avec la crontab  
-qui permet d'alerter l'utilisateur qu'un episode est  
+qui permet d'alerter l'utilisateur qu'un épisode est  
 disponible:
 
     #!/bin/bash
@@ -144,8 +144,8 @@ disponible:
         touch $HOME/MYSCRIPT.lock
     fi
 
-C'est bien sur completement inutile mais si besoin,  
-a adapter selon votre recherche et votre installation.
+C'est, bien sur, complètement inutile mais si besoin,  
+adaptez selon votre recherche et votre installation.
 
 ## CONFIGURATION
 
@@ -243,7 +243,7 @@ Pour installer pstreamer, exécutez:
 
 Si vous avez une installation locale de perl.  
 Vous pouvez installer depuis le répertoire en utilisant cpanm,  
-qui installera les dépendances :
+qui installera aussi les dépendances :
 
     $ cpanm .
 
