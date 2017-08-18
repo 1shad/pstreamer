@@ -6,6 +6,7 @@ lib/Pstreamer/Host.pm
 lib/Pstreamer/Host/Cloudy.pm
 lib/Pstreamer/Host/Easyvid.pm
 lib/Pstreamer/Host/Estream.pm
+lib/Pstreamer/Host/FlashX.pm
 lib/Pstreamer/Host/GoogleDrive.pm
 lib/Pstreamer/Host/Itazar.pm
 lib/Pstreamer/Host/Mystream.pm
