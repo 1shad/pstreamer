@@ -37,6 +37,7 @@ my %hosters = (
     vidabc         => 'Pstreamer::Host::Vidabc',
     'drive.google' => 'Pstreamer::Host::GoogleDrive',
     hqq            => 'Pstreamer::Host::Netu',
+    'flashx.tv'    => 'Pstreamer::Host::FlashX',
 );
 
 ########################################
