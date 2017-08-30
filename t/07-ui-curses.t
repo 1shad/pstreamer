@@ -8,15 +8,13 @@ ok( my $ui = Pstreamer::UI::Curses->new,
     'can Pstreamer::UI::Curses->new') || print "Bail out!\n";
 
 subtest 'Pstreamer::UI::Curses can run functions' => sub {
-    for (qw(init run about_dialog list popup_menu search_entry site_name)) {
+    for (qw(init run controller list site_list menu_list site_name)) {
         can_ok( $ui, $_);
     }
     for (qw(status error wait_for nostatus)) {
         can_ok( $ui, $_);
     }
-    for (qw(cui win listbox footer)) {
-        can_ok( $ui, $_);
-    }
+
 };
 
 subtest 'Pstreamer::UI::Curses->init' => sub {
