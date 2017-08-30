@@ -61,8 +61,7 @@ INTERFACES
 
     Le menu déroulant de gauche affiche la selection des sites. Le menu
     déroulant de droite affiche le menu du site selectionné. Quand il n'y a
-    pas encore de site selectionné, le menu de droite est inactif. Ca va
-    sans dire ( j'ai entendu ca dans un film une fois ... ).
+    pas encore de site selectionné, le menu de droite est inactif.
 
     Le bouton Recherche affiche l'entrée de texte. Tapez un texte à
     l'interieur puis Entrée pour lancer votre recherche.
@@ -279,9 +278,15 @@ INSTALLATION
         $ make test
         $ sudo make install
 
-    NB: Veuillez installer la librairie libncursesw5-dev, si vous utilisez
-    cpanm, avant d'installer le module Curses. Sinon l'utf-8 ne sera pas
-    pris en compte.
+    NB: * Les librairies suivantes sont requises si vous compilez vos
+    modules avec cpanm * ( Celles-ci sont disponibles pour GNU/Debian. Le
+    nom d'un paquet peut être différent en fonction de votre système )
+    Veuillez installer ces librairies avant d'installer ces modules.
+
+    Pour Curses: libncursesw5-dev ( utilisation de l'utf-8)
+
+    Pour Gtk3: libglib2.0-dev ( Glib ) libcairo2-dev ( Cairo )
+    libgirepository1.0-dev ( Glib::Object::Introspection )
 
 MISES A JOUR
     Si vous avez gardé le répertoire d'installation du dessus :
