@@ -8,21 +8,21 @@ Pstreamer::App - Application de streaming vidéo
 
 =head1 VERSION
 
- Version 0.007
+ Version 0.008
 
 =cut
 
-our $VERSION = '0.007';
+our $VERSION = '0.008';
 
 use utf8;
 use feature 'say';
 use Try::Tiny;
 use Scalar::Util qw(refaddr reftype);
+use Pstreamer::Config;
 use Pstreamer::Util::CloudFlare;
 use Pstreamer::Viewer;
 use Pstreamer::Host;
 use Pstreamer::Site;
-use Pstreamer::Config;
 use Moo;
 use MooX::Options description => 'perldoc Pstreamer::App pour les détails';
 
@@ -30,6 +30,12 @@ option ncurses => (
     is          => 'rw',
     negativable => 1,
     doc         => "Active l'interface ncurses",
+);
+
+option gtk => (
+    is          => 'rw',
+    negativable => 1,
+    doc         => "Active l'interface Gtk",
 );
 
 option fullscreen => (
@@ -76,12 +82,21 @@ before run => sub { shift->_init };
 # creates objects and vars
 sub _init {
     my $self = shift;
+    
+    # catch all warnings
+    $SIG{__WARN__} = sub { return 1; };
+    
+    $self->gtk(0) if !$self->gtk and $self->ncurses;
 
-    $self->ncurses(0) if @{$self->go};
+    if ( @{$self->go} ) {
+        $self->ncurses(0);
+        $self->gtk(0);
+    }
 
     my %options = (
         fullscreen => $self->fullscreen,
         ncurses    => $self->ncurses,
+        gtk        => $self->gtk,  
     );
 
     defined $options{$_} or delete $options{$_} for keys %options;
@@ -102,9 +117,6 @@ sub run {
         say "\nThis is Pstreamer::App version $VERSION\n";
         exit;
     }
-    
-    # catch all warnings
-    $SIG{__WARN__} = sub { return 1; };
 
     $self->UI->init;
     $self->UI->controller( $self );
@@ -277,7 +289,7 @@ sub _is_internal {
 =head1 DESCRIPTION
 
 Pstreamer permet de visionner des films ou des series,  
-en streaming, depuis un terminal, sur un système de type Unix.
+en streaming, depuis un terminal, sur un système compatible Unix.
 
 Il se connecte à certains sites français. Permet de les parcourir  
 via les liens disponibles ou par son menu, et permet de faire des recherches.  
@@ -291,7 +303,7 @@ Pour lancer pstreamer, exécutez:
 
 =head1 INTERFACES
 
-Il y a deux interfaces disponibles: 'text' et 'ncurses'.  
+Il y a trois interfaces disponibles: 'text', 'ncurses', et 'gtk3'.  
 L'interface text est utilisée par défault.
 
 =head2 TEXT
@@ -329,6 +341,29 @@ Voici la liste des racourcis:
 
     Control-q : quitter
 
+=head2 GTK3
+
+Cette interface ressemble à celle en ncurses et s'utilise de la même manière.  
+Par contre, il y a moins de racourcis. Ils seront ( peut-être ) rajoutés plus tard.  
+
+Le menu déroulant de gauche affiche la selection des sites.  
+Le menu déroulant de droite affiche le menu du site selectionné.  
+Quand il n'y a pas encore de site selectionné, le menu de droite est inactif.  
+
+Le bouton Recherche affiche l'entrée de texte. Tapez un texte à l'interieur  
+puis Entrée pour lancer votre recherche.
+
+Dans la liste, cliquez sur la ligne voulue pour la selectionner.  
+Sinon utilisez les flèches du clavier haut et bas pour aller sur la ligne voulue,  
+puis Entrée ou Flèche droite pour la selectionner.
+
+Le bouton Retour ou Flèche gauche servent à revenir en arrière dans la liste.
+
+Control-q pour quitter ou cliquez sur la croix.
+
+La priorité est sur cette interface sur vous activez les deux options sur la ligne  
+de commande ou dans le fichier de configuration.
+
 =head1 OPTIONS
 
 Les options de la ligne de commande sont prioritaires  
@@ -355,6 +390,15 @@ Active l'interface ncurses
 
 Désactive l'interface ncurses si l'option est activée  
 dans le fichier de configuration.
+
+=head2 --gtk
+
+Active l'interface Gtk
+
+=head2 --no-gtk
+
+Désactive l'interface Gtk si l'option est activée  
+dans le fichier de configuration
 
 =head2 --go
 
@@ -397,7 +441,7 @@ Voici un petit script bash à lancer avec la crontab
 qui permet d'alerter l'utilisateur qu'un épisode est  
 disponible:
 
-    #!/bin/bash
+    #!/usr/bin/env bash
     export DISPLAY=:0.0         # requis pour notify-send
     export PATH=$HOME/bin:$PATH # selon votre installation
 
@@ -458,6 +502,8 @@ Les options actuellement disponibles sont:
     fullscreen: 0 ou 1
     cookies: 0 ou 1
     user_agent: texte
+    ncurses: 0 ou 1
+    gtk: 0 ou 1
 
 Exemple d'un fichier INI:
 
@@ -465,6 +511,7 @@ Exemple d'un fichier INI:
     user_agent = Mozilla/5.0 (X11; Linux) AppleWebKit/538.15...
     fullscreen = 1
     cookies = 1
+    ncurses = 1
 
 Note pour les cookies:  
 Pstreamer utilisera un fichier pour stocker les cookies si  
@@ -509,6 +556,8 @@ L'emplacement du fichier est pour l'instant:
 =item Try::Tiny
 
 =item Curses::UI
+
+=item Gtk3
 
 =back
 
@@ -557,7 +606,7 @@ Sinon, installez les dépendances, avec par exemple pour debian :
     libio-socket-ssl-perl libmoox-singleton-perl libmoox-options-perl \
     libmoox-configfromfile-perl libclass-inspector-perl libfile-homedir-perl \
     libtry-tiny-perl libdata-record-perl libregexp-common-perl \
-    libterm-readline-gnu-perl libconfig-tiny-perl libcurses-ui-perl
+    libterm-readline-gnu-perl libconfig-tiny-perl libcurses-ui-perl libgtk3-perl
 
 Et ensuite depuis le répertoire :
 
