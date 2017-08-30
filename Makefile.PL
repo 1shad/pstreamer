@@ -43,6 +43,8 @@ WriteMakefile(
         'Term::ReadLine::Gnu'       => '0',
         'Curses'                    => '0',
         'Curses::UI'                => '0',
+        'Gtk3'                      => '0',
+        'Glib'                      => '0',
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'pstreamer-*' },
