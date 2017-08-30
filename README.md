@@ -1,8 +1,8 @@
-# NAME Pstreamer::App - Application de streaming vidéo
+## NAME Pstreamer::App - Application de streaming vidéo
 
     Version 0.008
 
-# DESCRIPTION
+## DESCRIPTION
 
 Pstreamer permet de visionner des films ou des series,  
 en streaming, depuis un terminal, sur un système compatible Unix.
@@ -11,18 +11,18 @@ Il se connecte à certains sites français. Permet de les parcourir
 via les liens disponibles ou par son menu, et permet de faire des recherches.  
 Les vidéos sont lues depuis les hébergeurs avec mpv.
 
-# UTILISATION
+## UTILISATION
 
 Pour lancer pstreamer, exécutez:
 
     $ pstreamer
 
-# INTERFACES
+## INTERFACES
 
 Il y a trois interfaces disponibles: 'text', 'ncurses', et 'gtk3'.  
 L'interface text est utilisée par défault.
 
-## TEXT
+### TEXT
 
 Le programme affiche les liens avec des numéros en début de ligne.  
 Taper le numéro de la ligne puis entrée pour continuer ou alors  
@@ -36,7 +36,7 @@ Les commandes du prompt disponibles sont:
     :q quitter
     :h aide  
 
-## NCURSES
+### NCURSES
 
 Le programme affiche les liens disponibles. Selectionner le lien  
 en descendant ou en montant avec les flèches haut et bas du clavier,  
@@ -57,7 +57,7 @@ Voici la liste des racourcis:
 
     Control-q : quitter
 
-## GTK3
+### GTK3
 
 Cette interface ressemble à celle en ncurses et s'utilise de la même manière.  
 Par contre, il y a moins de racourcis. Ils seront ( peut-être ) rajoutés plus tard.  
@@ -80,43 +80,43 @@ Control-q pour quitter ou cliquez sur la croix.
 La priorité est sur cette interface sur vous activez les deux options sur la ligne  
 de commande ou dans le fichier de configuration.
 
-# OPTIONS
+## OPTIONS
 
 Les options de la ligne de commande sont prioritaires  
 par rapport à celles du fichier de configuration.
 
-## --version|-v
+### --version|-v
 
 Affiche la version.
 
-## --fullscreen|--fs
+### --fullscreen|--fs
 
 Lance mpv en plein écran. Désactivée par défault.
 
-## --no-fullscreen
+### --no-fullscreen
 
 Désactive le plein écran, si l'option est activée dans  
 le fichier de configuration.
 
-## --ncurses
+### --ncurses
 
 Active l'interface ncurses
 
-## --no-ncurses
+### --no-ncurses
 
 Désactive l'interface ncurses si l'option est activée  
 dans le fichier de configuration.
 
-## --gtk
+### --gtk
 
 Active l'interface Gtk
 
-## --no-gtk
+### --no-gtk
 
 Désactive l'interface Gtk si l'option est activée  
 dans le fichier de configuration
 
-## --go
+### --go
 
 Cette option n'est disponible que avec l'interface text,  
 donc cette interface est automatiquement utilisée avec.
@@ -179,7 +179,7 @@ disponible:
 C'est, bien sur, complètement inutile mais si besoin,  
 adaptez selon votre recherche et votre installation.
 
-# CONFIGURATION
+## CONFIGURATION
 
 Vous pouvez utiliser un fichier de configuration, si vous  
 le souhaitez, pour paramétrer quelques propriétés ou options.
@@ -237,9 +237,9 @@ L'emplacement du fichier est pour l'instant:
 
     $HOME/.config/pstreamer/cookies/
 
-# DEPENDENCES
+## DEPENDENCES
 
-## Modules perl requis:
+### Modules perl requis:
 
 - Moo
 - utf8::all
@@ -257,20 +257,20 @@ L'emplacement du fichier est pour l'instant:
 - Curses::UI
 - Gtk3
 
-## Modules perl recommandés:
+### Modules perl recommandés:
 
 - WWW::Mechanize::PhantomJS
 - Config::Tiny
 
-## Programme externe requis:
+### Programme externe requis:
 
 - mpv, [https://mpv.io/](https://mpv.io/)
 
-## Programme externe recommandé:
+### Programme externe recommandé:
 
 - phantomjs, [http://phantomjs.org/](http://phantomjs.org/)
 
-# INSTALLATION
+## INSTALLATION
 
 Pour installer pstreamer, exécutez:
 
@@ -299,11 +299,20 @@ Et ensuite depuis le répertoire :
     $ sudo make install
 
 NB:  
-Veuillez installer la librairie libncursesw5-dev, si vous  
-utilisez cpanm, avant d'installer le module Curses.  
-Sinon l'utf-8 ne sera pas pris en compte.
+\* Les librairies suivantes sont requises si vous compilez vos modules avec cpanm \*   
+( Celles-ci sont disponibles pour GNU/Debian. Le nom d'un paquet peut être différent  
+en fonction de votre système )
+Veuillez installer ces librairies avant d'installer ces modules.
 
-# MISES A JOUR
+Pour Curses: libncursesw5-dev  
+( utilisation de l'utf-8)  
+
+Pour Gtk3:  
+libglib2.0-dev ( Glib )  
+libcairo2-dev  ( Cairo )  
+libgirepository1.0-dev  ( Glib::Object::Introspection )
+
+## MISES A JOUR
 
 Si vous avez gardé le répertoire d'installation du dessus :
 
@@ -322,7 +331,7 @@ Si vous n'avez pas gardé le répertoire :
 
     Comme pour l'installation sans les dépendances.
 
-# INSTALLATION DE WWW::Mechanize::PhantomJS
+## INSTALLATION DE WWW::Mechanize::PhantomJS
 
 Phantomjs n'est utilisé que pour l'hebergeur openload.  
 Comme il n'y a pas de paquet pour l'installer il faut le faire avec cpanm.
@@ -362,13 +371,13 @@ avec par exemple pour debian:
 
     $ apt-get install phantomjs
 
-# DOCUMENTATION
+## DOCUMENTATION
 
 Après installation, vous pouvez trouver la documentation avec la commande:
 
     $ perldoc Pstreamer::App
 
-# BUGS
+## BUGS
 
 Veuillez signaler tout bugs ou demandes de fonctionnalités via l'interface Web:  
 [https://github.com/1shad/pstreamer/issues](https://github.com/1shad/pstreamer/issues).  
@@ -379,7 +388,7 @@ Please report any bugs or feature requests through the web interface at:
 I will be notified, and then you'll automatically be notified of progress  
 on your bugs as I make changes.
 
-# LICENSE AND COPYRIGHT
+## LICENSE AND COPYRIGHT
 
 Copyright 2017 1shad.
 
