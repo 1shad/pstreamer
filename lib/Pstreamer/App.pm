@@ -616,9 +616,18 @@ Et ensuite depuis le répertoire :
     $ sudo make install
 
 NB:  
-Veuillez installer la librairie libncursesw5-dev, si vous  
-utilisez cpanm, avant d'installer le module Curses.  
-Sinon l'utf-8 ne sera pas pris en compte.
+* Les librairies suivantes sont requises si vous compilez vos modules avec cpanm *   
+( Celles-ci sont disponibles pour GNU/Debian. Le nom d'un paquet peut être différent  
+en fonction de votre système )
+Veuillez installer ces librairies avant d'installer ces modules.
+
+Pour Curses: libncursesw5-dev  
+( utilisation de l'utf-8)  
+
+Pour Gtk3:  
+libglib2.0-dev ( Glib )  
+libcairo2-dev  ( Cairo )  
+libgirepository1.0-dev  ( Glib::Object::Introspection )
 
 =head1 MISES A JOUR
 
