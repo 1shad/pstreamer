@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::More;
 
-plan tests => 41;
+plan tests => 42;
 
 BEGIN {
     use_ok( 'Pstreamer::App' ) || print "Bail out!\n";
@@ -53,6 +53,7 @@ BEGIN {
     
     use_ok( 'Pstreamer::UI::Text' );
     use_ok( 'Pstreamer::UI::Curses' );
+    use_ok( 'Pstreamer::UI::Gtk' );
 }
 
 diag( "Testing Pstreamer::App $Pstreamer::App::VERSION, Perl $], $^X" );
