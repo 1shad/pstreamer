@@ -37,6 +37,7 @@ lib/Pstreamer/Site/Skstream.pm
 lib/Pstreamer/Site/SokroStream.pm
 lib/Pstreamer/Site/StreamingSeriescx.pm
 lib/Pstreamer/UI/Curses.pm
+lib/Pstreamer/UI/Gtk.pm
 lib/Pstreamer/UI/Text.pm
 lib/Pstreamer/Util/CloudFlare.pm
 lib/Pstreamer/Util/CookieJarFile.pm
@@ -55,6 +56,7 @@ t/04-viewer.t
 t/05-app.t
 t/06-ui-text.t
 t/07-ui-curses.t
+t/08-ui-gtk.t
 t/10-radego.t
 t/11-librestream.t
 t/12-sokrostream.t
