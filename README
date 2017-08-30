@@ -2,11 +2,11 @@ NAME
     Pstreamer::App - Application de streaming vidéo
 
 VERSION
-     Version 0.007
+     Version 0.008
 
 DESCRIPTION
     Pstreamer permet de visionner des films ou des series, en streaming,
-    depuis un terminal, sur un système de type Unix.
+    depuis un terminal, sur un système compatible Unix.
 
     Il se connecte à certains sites français. Permet de les parcourir via
     les liens disponibles ou par son menu, et permet de faire des
@@ -18,8 +18,8 @@ UTILISATION
         $ pstreamer
 
 INTERFACES
-    Il y a deux interfaces disponibles: 'text' et 'ncurses'. L'interface
-    text est utilisée par défault.
+    Il y a trois interfaces disponibles: 'text', 'ncurses', et 'gtk3'.
+    L'interface text est utilisée par défault.
 
   TEXT
     Le programme affiche les liens avec des numéros en début de ligne. Taper
@@ -54,6 +54,31 @@ INTERFACES
 
         Control-q : quitter
 
+  GTK3
+    Cette interface ressemble à celle en ncurses et s'utilise de la même
+    manière. Par contre, il y a moins de racourcis. Ils seront ( peut-être )
+    rajoutés plus tard.
+
+    Le menu déroulant de gauche affiche la selection des sites. Le menu
+    déroulant de droite affiche le menu du site selectionné. Quand il n'y a
+    pas encore de site selectionné, le menu de droite est inactif. Ca va
+    sans dire ( j'ai entendu ca dans un film une fois ... ).
+
+    Le bouton Recherche affiche l'entrée de texte. Tapez un texte à
+    l'interieur puis Entrée pour lancer votre recherche.
+
+    Dans la liste, cliquez sur la ligne voulue pour la selectionner. Sinon
+    utilisez les flèches du clavier haut et bas pour aller sur la ligne
+    voulue, puis Entrée ou Flèche droite pour la selectionner.
+
+    Le bouton Retour ou Flèche gauche servent à revenir en arrière dans la
+    liste.
+
+    Control-q pour quitter ou cliquez sur la croix.
+
+    La priorité est sur cette interface sur vous activez les deux options
+    sur la ligne de commande ou dans le fichier de configuration.
+
 OPTIONS
     Les options de la ligne de commande sont prioritaires par rapport à
     celles du fichier de configuration.
@@ -74,6 +99,13 @@ OPTIONS
   --no-ncurses
     Désactive l'interface ncurses si l'option est activée dans le fichier de
     configuration.
+
+  --gtk
+    Active l'interface Gtk
+
+  --no-gtk
+    Désactive l'interface Gtk si l'option est activée dans le fichier de
+    configuration
 
   --go
     Cette option n'est disponible que avec l'interface text, donc cette
@@ -111,7 +143,7 @@ OPTIONS
     Voici un petit script bash à lancer avec la crontab qui permet d'alerter
     l'utilisateur qu'un épisode est disponible:
 
-        #!/bin/bash
+        #!/usr/bin/env bash
         export DISPLAY=:0.0         # requis pour notify-send
         export PATH=$HOME/bin:$PATH # selon votre installation
 
@@ -172,6 +204,8 @@ CONFIGURATION
         fullscreen: 0 ou 1
         cookies: 0 ou 1
         user_agent: texte
+        ncurses: 0 ou 1
+        gtk: 0 ou 1
 
     Exemple d'un fichier INI:
 
@@ -179,6 +213,7 @@ CONFIGURATION
         user_agent = Mozilla/5.0 (X11; Linux) AppleWebKit/538.15...
         fullscreen = 1
         cookies = 1
+        ncurses = 1
 
     Note pour les cookies: Pstreamer utilisera un fichier pour stocker les
     cookies si vous activer l'option. C'est utile pour cloudflare IMUA, mais
@@ -205,6 +240,7 @@ DEPENDENCES
     Regexp::Common
     Try::Tiny
     Curses::UI
+    Gtk3
 
   Modules perl recommandés:
     WWW::Mechanize::PhantomJS
@@ -234,7 +270,7 @@ INSTALLATION
         libio-socket-ssl-perl libmoox-singleton-perl libmoox-options-perl \
         libmoox-configfromfile-perl libclass-inspector-perl libfile-homedir-perl \
         libtry-tiny-perl libdata-record-perl libregexp-common-perl \
-        libterm-readline-gnu-perl libconfig-tiny-perl libcurses-ui-perl
+        libterm-readline-gnu-perl libconfig-tiny-perl libcurses-ui-perl libgtk3-perl
 
     Et ensuite depuis le répertoire :
 
