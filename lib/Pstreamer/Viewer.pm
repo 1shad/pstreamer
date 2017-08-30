@@ -50,15 +50,15 @@ sub _player {
 
     # set up for mpv -http-header-fields
     @fields = map { s/,/\\,/gr } @fields;
-    @fields = grep { ! /user-agent|content-length/i } @fields;
+    @fields = grep { ! /user-agent|content-length|accept/i } @fields;
 
     $cmd = [ $mpv ];
-    push( @$cmd, '-really-quiet');
+    push( @$cmd, '--really-quiet');
     push( @$cmd, '--no-ytdl');
     push( @$cmd, '--fs' ) if $self->config->fullscreen;
-    push( @$cmd, '-user-agent');
+    push( @$cmd, '--user-agent');
     push( @$cmd, $self->ua->transactor->name );
-    push( @$cmd, '-http-header-fields' );
+    push( @$cmd, '--http-header-fields' );
     push( @$cmd, join ",", @fields );
     
     # in case that cookies will be needed later
@@ -70,7 +70,7 @@ sub _player {
     
     $self->status("MPV en cours" );
     my ( $success ) = run( command => $cmd, verbose => 0 );
-    $self->error("MPV ne peut pas lire cette video") unless $success;
+    $self->error("MPV ne peut pas lire ce fichier") unless $success;
     return $success;
 }
 
