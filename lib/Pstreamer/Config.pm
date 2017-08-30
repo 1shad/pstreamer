@@ -38,7 +38,7 @@ has config_file => ( is => 'ro', default => sub {
     File::Spec->catfile( $CONFIG_DIR, 'config.ini' );
 });
 
-has [qw(cookies fullscreen ncurses)] => ( is => 'rw' );
+has [qw(cookies fullscreen ncurses gtk)] => ( is => 'rw' );
 
 # user agent
 sub _build_ua {
@@ -70,10 +70,14 @@ sub _build_ua {
 sub _build_ui {
     my $self = shift;
     my $ui;
-
-    if ( $self->ncurses ) {
+    
+    if ( $self->gtk ) {
+        $ui = 'Pstreamer::UI::Gtk';
+    }
+    elsif ( $self->ncurses ) {
         $ui = 'Pstreamer::UI::Curses';
-    } else {
+    }
+    else {
         $ui = 'Pstreamer::UI::Text';
     }
     
