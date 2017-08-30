@@ -1,5 +1,9 @@
 Revision history for pstreamer
 
+0.008   Wed, 30 Aug 2017
+        * Ajout de l'interface Gtk3
+        * Update de Netu
+
 0.007   Fri, 18 Aug 2017
         * Ajout de l'hebergeur FlashX
 
