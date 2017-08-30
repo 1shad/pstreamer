@@ -6,10 +6,13 @@ package Pstreamer::Host::Netu;
 
 =cut
 
+use feature 'say';
 use Mojo::Util qw(encode b64_encode b64_decode url_unescape html_unescape);
 use Mojo::JSON 'decode_json';
 use Pstreamer::Util::Unwise 'unwise';
 use Moo;
+
+my $DEBUG = 0;
 
 with 'Pstreamer::Role::UA';
 
@@ -17,9 +20,11 @@ sub get_filename {
     my ( $self, $url ) = @_;
     my ( $tx, $dom, $headers, $form, $url2, $host, $wise, $file );
     my ( $at, $iss, $vid, $pass, $referer, $vid_server, $vid_link );
-
+    
+    say "URL: $url" if $DEBUG;
     # set up url
     $url = $self->_set_url( $url );
+    say "URL: $url" if $DEBUG;
 
     # get the first page
     $headers = { Referer => 'http://hqq.tv/' };
@@ -93,11 +98,24 @@ sub get_filename {
     $dom = decode_json($dom);
 
     # extract and decode file url
-    $file = $dom->{file};
-    $file = $self->_decodeK($file);
-    $file = b64_decode($file);
-    $file =~ s/\?socket/.mp4.m3u8/;
-    
+    # actually each one is valid... but the code is set
+    if ( defined $dom->{html5_file} ) {
+        say 'HTML5_FILE' if $DEBUG;
+        $file = $self->_decodeU( $dom->{html5_file} );
+    }
+    if( defined $dom->{obf_link} and !$file ) {
+        say 'OBF_LINK' if $DEBUG;
+        $file = $self->_decodeU( $dom->{obf_link} );
+        $file = 'http:'.$file if( $file =~ /^\/\// );
+    }
+    if( defined $dom->{file} and !$file ) {
+        say 'FILE' if $DEBUG;
+        $file = $self->_decodeK( $dom->{file}) ;
+        $file = b64_decode( $file );
+        $file =~ s/\?socket/.mp4.m3u8/;
+    }
+
+    say $file if $DEBUG;
     return $file?$file:0;
 }
 
@@ -112,7 +130,7 @@ sub _set_url {
 sub _get_id {
     my ( $self, $url ) = @_;
     
-    my ($id) = $url =~ /\?v.*=(\w+)/;
+    my ($id) = $url =~ /\?v.*?=(\w+)/;
    
     return $id;
 }
@@ -124,6 +142,19 @@ sub _get_ip {
     $ip .= join('.', map{ int(rand(256)) } 1 .. 2 );
 
     return b64_encode($ip, '');
+}
+
+sub _decodeU {
+    my ( $self, $str ) = @_;
+
+    # delete the first char (#)
+    $str =~ s/#//;
+    return 0 unless( (length $str) % 3 == 0 );
+
+    # Every 3 chars should be preceded by \\u0
+    # It's directly decoded below...
+    $str =~ s/(...)/pack 'U*', hex($1)/eg;
+    return $str;
 }
 
 sub _decodeK {
