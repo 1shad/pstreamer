@@ -1,5 +1,9 @@
 Revision history for pstreamer
 
+0.009   Mon, 04 Sep 2017
+        * Ajout du site streamay
+        * Update de papystreaming
+
 0.008   Wed, 30 Aug 2017
         * Ajout de l'interface Gtk3
         * Update de Netu
