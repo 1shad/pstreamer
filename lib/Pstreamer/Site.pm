@@ -19,6 +19,7 @@ my %sites = (
     Radego              => "Pstreamer::Site::Radego",
     Papystreaming       => "Pstreamer::Site::PapyStreaming",
     Skstream            => "Pstreamer::Site::Skstream",
+    Streamay            => "Pstreamer::Site::Streamay",
 );
 
 ###########################
