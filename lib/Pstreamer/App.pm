@@ -8,11 +8,11 @@ Pstreamer::App - Application de streaming vidéo
 
 =head1 VERSION
 
- Version 0.008
+ Version 0.009
 
 =cut
 
-our $VERSION = '0.008';
+our $VERSION = '0.009';
 
 use utf8;
 use feature 'say';
@@ -132,11 +132,11 @@ sub proceed {
     return unless $element;
     
     my @list = $self->_proceed_line( $element );
-    
-    while ( @list == 1 and ! $self->_is_internal( $list[0]->{url} ) ) {
+
+    while ( @list == 1 and !$self->_is_internal( $list[0]->{url} ) ) {
         # breaks recursion if any
         if ( $one_choice_str =~ /$list[0]->{url}/ ) {
-            @list = $self->UI->list;
+            @list = @{$self->UI->list};
             last;
         } else {
             $one_choice_str .= $list[0]->{url};
@@ -206,6 +206,10 @@ sub _proceed_line {
                 $self->site->url( $self->tx->req->url );
             }
         }
+        elsif ( defined $_->{stream} ) { # stream file
+            try   { $self->viewer->stream( $_->{url}, $_->{stream} ); }
+            catch { $self->UI->error("Le lien trouvé n'est pas valide"); };
+        }
         elsif ( $self->_is_internal( $_->{url} ) ) { # site internal
             if ( defined $_->{params} ) {
                 $self->site->current->params($_->{params});
@@ -213,10 +217,6 @@ sub _proceed_line {
                 $self->history( $self->tx->req->url );
                 $self->tx( $self->_get( $_->{url} ) );
             }
-        }
-        elsif ( defined $_->{stream} ) { # stream file
-            try   { $self->viewer->stream( $_->{url}, $_->{stream} ); }
-            catch { $self->UI->error("Le lien trouvé n'est pas valide"); };
         }
         else { # host urls
             my $res;
