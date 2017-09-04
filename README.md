@@ -1,6 +1,6 @@
-## NAME Pstreamer::App - Application de streaming vidéo
+## Pstreamer::App - Application de streaming vidéo
 
-    Version 0.008
+    Version 0.009
 
 ## DESCRIPTION
 
