@@ -17,8 +17,8 @@ with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
 has '+url' => ( default => 'http://papy-streaming.org/' );
 
 has '+menu' => ( default => sub { {
-    'Accueil'          => '/',
-    'Film Streaming'   => '/film-streaming-hd/',
+    'Accueil'          => '/papystreaming-2017/',
+    'Film Streaming'   => '/film-streaming-hd-2017/',
     'Series Streaming' => '/series-streaming-hd/',
     'Derniers ajouts'  => '/nouveaux-films-hd/',
     'Populaire'        => '/populaire-hd/',
@@ -28,7 +28,8 @@ has '+menu' => ( default => sub { {
 
 sub search {
     my ( $self, $text ) = @_;
-    return $self->ua->get( $self->url => form => { s => $text } );
+    my $url = Mojo::URL->new('/')->to_abs( $self->url );
+    return $self->ua->get( $url => form => { s => $text } );
 }
 
 sub get_results {
@@ -39,7 +40,7 @@ sub get_results {
     
     for( $tx->req->url ) {
         if ( /film\/|episode/) {
-            @results = $self->_get_hosters_links($dom);
+            @results = $self->_get_hosters_links($dom, $_);
         }
         elsif ( /(#.*)$/ )  {
             @results = $self->_get_serie_episodes( $dom, $1 );
@@ -51,7 +52,6 @@ sub get_results {
             @results = $self->_get_default_links($dom);
         }
     }
-    
     return @results;
 }
 
@@ -61,6 +61,7 @@ sub _get_default_links {
 
     @results = $dom->find('.info a')
         ->grep( sub { $_->attr('href') } )
+        ->grep( sub { $_->text ne ' ' } )
         ->map( sub { {
             url => $_->attr('href'),
             name => trim($_->text).' - '.$_->parent->next->text,
@@ -101,7 +102,7 @@ sub _get_serie_seasons {
 }
 
 sub _get_hosters_links {
-    my ( $self, $dom ) = @_;
+    my ( $self, $dom, $from_url ) = @_;
     my ( @results, $links );
 
     $links = $self->_get_repron_links($dom);
@@ -120,11 +121,15 @@ sub _get_hosters_links {
             name => $_->[1].' '.$_->[2].' '.$_->[3],
         } } )
         ->each;
-
+    
     @results = map {
         if ( $_->{url} =~ /player\.papystreaming/ ) {
-            @{ $self->_get_papy_player_links( $_ ) };
-        } else { $_ }
+            @{ $self->_get_papy_player_links( $_, $from_url ) };
+        }
+        elsif( $_->{url} =~ /stream\.papy/ ) {
+            @{ $self->_get_papy_stream_links( $_, $from_url ) };
+        }
+        else { $_ }
     } @results;
     
     return @results;
@@ -145,11 +150,12 @@ sub _get_repron_links {
 }
 
 sub _get_papy_player_links {
-    my ( $self, $item ) = @_;
+    my ( $self, $item, $from_url ) = @_;
     my ( $tx, $json ) = ( undef, [] );
 
-    $tx = $self->ua->get( $item->{url} );
-    my $headers = { Referer => $item->{url} };
+    my $headers = { Referer => $from_url };
+    $tx = $self->ua->get( $item->{url} => $headers );
+    $headers = { Referer => $item->{url} };
     
     if ( my $iframe = $tx->res->dom->at('iframe') ) {
         $tx = $self->ua->head( $iframe->attr('src') => $headers );
@@ -168,6 +174,23 @@ sub _get_papy_player_links {
     }
     
     return $json;
+}
+
+sub _get_papy_stream_links {
+    my ( $self, $item, $from_url ) = @_;
+    my ( $tx, $file );
+
+    my $headers = { Referer => $from_url };
+    $tx = $self->ua->get( $item->{url} => $headers );
+
+    ($file) = $tx->res->dom =~ /file:\s*["\']([^"\']+)/;
+
+    return [ {
+        url => $file,
+        name => $item->{name},
+        stream => 1,
+    } ];
+
 }
 
 sub _find_next_page {
