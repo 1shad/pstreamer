@@ -35,6 +35,7 @@ lib/Pstreamer/Site/Radego.pm
 lib/Pstreamer/Site/Sample.pm
 lib/Pstreamer/Site/Skstream.pm
 lib/Pstreamer/Site/SokroStream.pm
+lib/Pstreamer/Site/Streamay.pm
 lib/Pstreamer/Site/StreamingSeriescx.pm
 lib/Pstreamer/UI/Curses.pm
 lib/Pstreamer/UI/Gtk.pm
@@ -63,4 +64,5 @@ t/12-sokrostream.t
 t/13-papystreaming.t
 t/14-skstream.t
 t/15-streamingseriescx.t
+t/16-streamay.t
 xt/boilerplate.t
