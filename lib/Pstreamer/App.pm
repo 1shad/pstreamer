@@ -8,11 +8,11 @@ Pstreamer::App - Application de streaming vidéo
 
 =head1 VERSION
 
- Version 0.009
+ Version 0.010
 
 =cut
 
-our $VERSION = '0.009';
+our $VERSION = '0.010';
 
 use utf8;
 use feature 'say';
@@ -143,9 +143,12 @@ sub proceed {
         }
         @list = $self->_proceed_line( $list[0] );
     }
-    
-    $self->UI->error('Aucun résultat') unless @list;
-    $self->UI->list( [@list] );
+
+    if ( @list ) {
+        $self->UI->list( [@list] );
+    } else {
+        $self->UI->error('Aucun résultat') unless @list;
+    }
 }
 
 sub proceed_previous {
@@ -164,7 +167,12 @@ sub proceed_previous {
     
     $self->tx( $self->_get( $previous ) );
     @list = $self->site->get_results( $self->tx );
-    $self->UI->list( [@list] );
+    
+    if ( @list ) {
+        $self->UI->list( [@list] );
+    } else {
+        $self->UI->error('Aucun résultat') unless @list;
+    }
 }
 
 # processes search text written by the user
@@ -178,8 +186,11 @@ sub proceed_search {
     $self->tx( $self->site->search($text) );
     @list = $self->site->get_results($self->tx);
     
-    $self->UI->error('Aucun résultat') unless @list;
-    $self->UI->list( [@list] );
+    if ( @list ) {
+        $self->UI->list( [@list] );
+    } else {
+        $self->UI->error('Aucun résultat') unless @list;
+    }
 }
 
 # processes the selected line by the user
