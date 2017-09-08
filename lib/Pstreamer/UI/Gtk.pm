@@ -205,6 +205,7 @@ sub clear_list {
 # Populate listbox
 sub list {
     my ( $self, $arr ) = @_;
+    return $self->data_list unless $arr;
     
     $self->clear_list();
     foreach ( @$arr ) {
