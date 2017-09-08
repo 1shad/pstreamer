@@ -125,6 +125,8 @@ sub about_dialog {
 
 sub list {
     my ( $self, $arr ) = @_;
+    return $self->data_list unless $arr;
+
     my @array = map { $_->{name} } @{$arr};
     
     my $values = [ 0 .. $#array ];
