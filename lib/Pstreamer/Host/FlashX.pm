@@ -47,8 +47,10 @@ sub get_filename{
     return 0 unless $self->_unadblock;
     
     # Find the link to the next page in the html source
-    @links = $dom =~ /href=["\'](https*:\/\/www\.flashx[^"\']+)/g;
-    $url = $links[1];
+    @links = $dom =~ /href=["'](https*:\/\/www\.flashx[^"']+)/g;
+    $url = $links[0];
+    return 0 unless $url;
+
     say "URL2: $url" if $DEBUG;
     
     # get the next page
