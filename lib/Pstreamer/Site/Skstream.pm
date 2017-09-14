@@ -10,10 +10,10 @@ use utf8;
 use Mojo::URL;
 use Mojo::Util 'trim';
 use Mojo::JSON 'decode_json';
-use Pstreamer::Util::Unpacker;
+use Pstreamer::Util::Unpacker 'jsunpack';
 use Moo;
 
-with 'Pstreamer::Role::Site','Pstreamer::Role::UA','Pstreamer::Role::UI';
+with 'Pstreamer::Role::Site','Pstreamer::Role::UA';
 
 has '+url' => ( default => 'http://www.skstream.co/' );
 
@@ -32,6 +32,8 @@ sub search {
 sub get_results {
     my ( $self, $tx ) = @_;
     my ( $dom, @results );
+
+    return $self->_handle_params if $self->params;
     
     $dom = $tx->result->dom;
     
@@ -83,7 +85,6 @@ sub _get_episodes {
     return @results;
 }
 
-
 sub _get_seasons {
     my ( $self, $dom, $uri ) = @_;
     my ( $title, @results );
@@ -102,9 +103,7 @@ sub _get_seasons {
 
 sub _get_hosters_links {
     my ( $self, $dom, $uri ) = @_;
-    my ( $headers, @results );
-
-    $headers = { Referer => $uri };
+    my @results;
 
     @results = $dom->find('tr.changeplayer')
         ->map('find', 'td')
@@ -116,26 +115,35 @@ sub _get_hosters_links {
         } } )
         ->each;
     
-    # get urls from dl-protect
-    $self->status('Déblocage des liens');    
     @results = map {
         if ( $_->{url} =~ /dl-protect/ ) {
-            @{ $self->_get_dl_protect( $_, $headers ) };
+            $_->{params} = {
+                url  => $_->{url},
+                name => $_->{name},
+                from => $uri,
+            };
+            $_->{url} = $self->url;
+            $_;
         } else { $_ }
     } @results;
-
-    #@results = grep { $_->{url} } @results;
 
     return @results;
 }
 
+sub _handle_params {
+    my $self = shift;
+    my @results = $self->_get_dl_protect( $self->params );
+    $self->params(undef);
+    return @results;
+}
+
 sub _get_dl_protect {
-    my ( $self, $item, $headers ) = @_;
-    my ( $tx , $res, $JsU );
+    my ( $self, $item ) = @_;
+    my ( $tx, $headers, $res );
+
+    $headers = { Referer => $item->{from} };
 
     $res = [];
-    $JsU = Pstreamer::Util::Unpacker->new;
-
     $tx = $self->ua->head( $item->{url} => $headers );
     
     # Case redirect
@@ -168,9 +176,8 @@ sub _get_dl_protect {
         # case javascript packer
         elsif ( my ($p) = 
             $tx->res->dom =~ /(eval\(function\(p,a,c,k,e(?:.|\s)+?\))\n?<\/script>/ ) {
-            if ( Pstreamer::Util::Unpacker::is_valid( \$p ) ) {
-                $JsU->packed( \$p );
-                $p = $JsU->unpack;
+            $p = jsunpack( \$p );
+            if ( $p ) {
                 $p =~ s/.*src='([^']+).*/$1/;
                 $res = [ {
                     url  => $p,
@@ -183,7 +190,7 @@ sub _get_dl_protect {
         }
     }
 
-    return $res;
+    return @$res;
 }
 
 sub _find_next_page {
