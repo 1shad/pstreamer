@@ -6,7 +6,7 @@ package Pstreamer::Host::Watchers;
 
 =cut
 
-use Pstreamer::Util::Unpacker;
+use Pstreamer::Util::Unpacker 'jsunpack';
 use Moo;
 
 with 'Pstreamer::Role::UA';
@@ -22,7 +22,8 @@ sub get_filename {
 
     ($js) = $dom =~ /(eval\(function\(p,a,c,k,e(?:.|\s)+?\))\n?<\/script>/;
     return 0 unless $js;
-    $js = Pstreamer::Util::Unpacker->new ( packed => \$js )->unpack;
+    $js = jsunpack( \$js );
+    return 0 unless $js;
     
     $headers.='|Referer=http://watchers.to/player7/jwplayer.flash.swf';
     while( $js =~ /{file:"([^"]+)",label:"(\d+)"}/g ){
