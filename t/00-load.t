@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::More;
 
-plan tests => 43;
+plan tests => 44;
 
 BEGIN {
     use_ok( 'Pstreamer::App' ) || print "Bail out!\n";
@@ -19,6 +19,7 @@ BEGIN {
     
     use_ok( 'Pstreamer::Util::CloudFlare' );
     use_ok( 'Pstreamer::Util::CookieJarFile' );
+    use_ok( 'Pstreamer::Util::Unjuice' );
     use_ok( 'Pstreamer::Util::Unpacker' );
     use_ok( 'Pstreamer::Util::Unwise' );
 
