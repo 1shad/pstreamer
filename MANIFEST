@@ -42,6 +42,7 @@ lib/Pstreamer/UI/Gtk.pm
 lib/Pstreamer/UI/Text.pm
 lib/Pstreamer/Util/CloudFlare.pm
 lib/Pstreamer/Util/CookieJarFile.pm
+lib/Pstreamer/Util/Unjuice.pm
 lib/Pstreamer/Util/Unpacker.pm
 lib/Pstreamer/Util/Unwise.pm
 lib/Pstreamer/Viewer.pm
