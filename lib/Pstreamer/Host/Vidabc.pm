@@ -6,7 +6,7 @@ package Pstreamer::Host::Vidabc;
 
 =cut
 
-use Pstreamer::Util::Unpacker;
+use Pstreamer::Util::Unpacker 'jsunpack';
 use Mojo::JSON 'decode_json';
 use Moo;
 
@@ -21,9 +21,9 @@ sub get_filename {
     
     ($js) = $tx->res->dom =~ /(eval\(function\(p,a,c,k,e,d\)\{.+?\)\)\))/;
     return 0 unless $js;
-    return 0 unless Pstreamer::Util::Unpacker::is_valid( \$js );
     
-    $js = Pstreamer::Util::Unpacker->new( packed => \$js )->unpack;
+    $js = jsunpack( \$js );
+    return 0 unless $js;
 
     ($json) = $js =~ /sources:\s?(\[.*?\]),/;
     return 0 unless $json;
