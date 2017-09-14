@@ -7,6 +7,7 @@ package Pstreamer::Site::PapyStreaming;
 =cut
 
 use utf8;
+use Pstreamer::Util::Unjuice 'unjuice';
 use Mojo::JSON 'decode_json';
 use Mojo::Util 'trim';
 use Mojo::URL;
@@ -35,7 +36,9 @@ sub search {
 sub get_results {
     my ( $self, $tx ) = @_;
     my ( $dom, @results );
-    
+
+    return $self->_handle_params() if $self->params;
+
     $dom = $tx->result->dom;
     
     for( $tx->req->url ) {
@@ -121,13 +124,16 @@ sub _get_hosters_links {
             name => $_->[1].' '.$_->[2].' '.$_->[3],
         } } )
         ->each;
-    
+
     @results = map {
-        if ( $_->{url} =~ /player\.papystreaming/ ) {
-            @{ $self->_get_papy_player_links( $_, $from_url ) };
-        }
-        elsif( $_->{url} =~ /stream\.papy/ ) {
-            @{ $self->_get_papy_stream_links( $_, $from_url ) };
+        if ( $_->{url} =~ /papy-?streaming\.org/ ) {
+            $_->{params} = {
+                url  => $_->{url},
+                name => $_->{name},
+                from => $from_url,
+            };
+            $_->{url} = $self->url;
+            $_;
         }
         else { $_ }
     } @results;
@@ -149,11 +155,33 @@ sub _get_repron_links {
     return $json;
 }
 
-sub _get_papy_player_links {
-    my ( $self, $item, $from_url ) = @_;
-    my ( $tx, $json ) = ( undef, [] );
+sub _handle_params {
+    my $self = shift;
+    my @results;
+    my $params = $self->params;
 
-    my $headers = { Referer => $from_url };
+    if ( $params->{url} =~ /player2\.papystreaming/ ) {
+        @results = $self->_get_papy_player2_links( $params );
+    }
+    elsif ( $params->{url} =~ /player\.papystreaming/ ) {
+        @results = $self->_get_papy_player_links( $params );
+    }
+    elsif( $params->{url} =~ /stream\.papy/ ) {
+        @results = $self->_get_papy_stream_links( $params );
+    }
+    else {
+        @results = ();
+    }
+
+    $self->params( undef );
+    return @results;
+}
+
+sub _get_papy_player_links {
+    my ( $self, $item ) = @_;
+    my ( $tx, @result );
+
+    my $headers = { Referer => $item->{from} };
     $tx = $self->ua->get( $item->{url} => $headers );
     $headers = { Referer => $item->{url} };
     
@@ -167,30 +195,59 @@ sub _get_papy_player_links {
             $tx = $self->ua->head( $src => $headers );
         }
 
-        $json = [ {
+        push ( @result,  {
             url  => Mojo::URL->new( $src )->host('drive.google.com'),
             name => $item->{name},
-        } ];
+        });
     }
     
-    return $json;
+    return @result;
+}
+
+sub _get_papy_player2_links {
+    my ( $self, $item ) = @_;
+    my ( $tx, $juice, @result );
+    
+    my $headers = { Referer => $item->{from} };
+    $tx = $self->ua->get( $item->{url} => $headers );
+    return () unless $tx->success;
+    
+    $self->ua->inactivity_timeout(20);
+
+    ($juice) = $tx->res->dom =~ /(JuicyCodes.Run\(.+?\);)/;
+
+    $juice = unjuice( $juice );
+    return () unless $juice;
+
+    $juice =~ s/.*sources:\[\{["']file["']:["']([^"']+).*/$1/;
+    return () unless $juice;
+
+    push ( @result, {
+        url  => $juice,
+        name => $item->{name},
+        stream => 1,
+    });
+
+    return @result;
 }
 
 sub _get_papy_stream_links {
-    my ( $self, $item, $from_url ) = @_;
-    my ( $tx, $file );
+    my ( $self, $item ) = @_;
+    my ( $tx, $file, @result );
 
-    my $headers = { Referer => $from_url };
+    my $headers = { Referer => $item->{from} };
     $tx = $self->ua->get( $item->{url} => $headers );
 
     ($file) = $tx->res->dom =~ /file:\s*["\']([^"\']+)/;
+    return () unless $file;
 
-    return [ {
+    push ( @result, {
         url => $file,
         name => $item->{name},
         stream => 1,
-    } ];
-
+    });
+    
+    return @result;
 }
 
 sub _find_next_page {
