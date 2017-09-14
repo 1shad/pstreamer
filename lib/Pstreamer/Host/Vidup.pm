@@ -6,8 +6,8 @@ package Pstreamer::Host::Vidup;
 
 =cut
 
-use Mojo::Util qw(html_unescape);
-use Pstreamer::Util::Unpacker;
+use Mojo::Util 'html_unescape';
+use Pstreamer::Util::Unpacker 'jsunpack';
 use Moo;
 
 with 'Pstreamer::Role::UA';
@@ -34,9 +34,13 @@ sub get_filename {
     $code_url = 'http://vidup.me/jwv/'.$key;
     $tx = $self->ua->get( $code_url );
     return 0 unless $tx->success;
+    
+    # decode javascript
     $dom2 = html_unescape( $tx->res->dom );
-    return 0 unless Pstreamer::Util::Unpacker::is_valid( \$dom2 );
-    $dom2 = Pstreamer::Util::Unpacker->new( packed => \$dom2 )->unpack;
+    $dom2 = jsunpack( \$dom2 );
+    return 0 unless $dom2;
+    
+    # get the code
     ($code) = $dom2 =~ /vt=([^"]+)"/;
 
     # format datas
