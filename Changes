@@ -1,5 +1,13 @@
 Revision history for pstreamer
 
+0.011   Thu, 14 Sep 2017
+        * Update de Unpacker, et des modules l'utilisant
+        * Update de Speedvid
+        * Update de FlashX
+        * Ajout du module Unjuice
+        * Update de Papystreaming ( nouveau lecteur )
+        * Update de Skstream ( affichage des liens sans delai )
+
 0.010   Fri, 08 Sep 2017
         * Correction de bugs ( sortie inopinee, liste vide )
 
