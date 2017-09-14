@@ -6,7 +6,7 @@ package Pstreamer::Host::Vidto;
 
 =cut
 
-use Pstreamer::Util::Unpacker;
+use Pstreamer::Util::Unpacker 'jsunpack';
 use Moo;
 
 with 'Pstreamer::Role::UA', 'Pstreamer::Role::UI';
@@ -34,7 +34,8 @@ sub get_filename {
     ($js) = $dom =~ /(eval\(function\(p,a,c,k,e(?:.|\s)+?\))\n?<\/script>/;
     
     if ($js) {
-        $js = Pstreamer::Util::Unpacker->new( packed => \$js )->unpack;
+        $js = jsunpack( \$js );
+        return 0 unless $js;
         ($file) = $js =~ /,\{?file:"([^"]+)"}/;
         ($file) = $js =~ /{file:\s*"([^"]+(?<!smil))"}/ if ! $file;
     } else {
