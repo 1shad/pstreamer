@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::More;
 
-plan tests => 44;
+plan tests => 45;
 
 BEGIN {
     use_ok( 'Pstreamer::App' ) || print "Bail out!\n";
@@ -30,6 +30,7 @@ BEGIN {
     use_ok( 'Pstreamer::Site::Skstream' );
     use_ok( 'Pstreamer::Site::StreamingSeriescx' );
     use_ok( 'Pstreamer::Site::Streamay' );
+    use_ok( 'Pstreamer::Site::ZoneTelechargement' );
     use_ok( 'Pstreamer::Site::Sample' );
     
     use_ok( 'Pstreamer::Host::Cloudy' );
