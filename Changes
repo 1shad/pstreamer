@@ -1,5 +1,8 @@
 Revision history for pstreamer
 
+0.012   Mon, 2 Oct 2017
+        * Ajout du site Zone-telechargement ( liens uptobox )
+        
 0.011   Thu, 14 Sep 2017
         * Update de Unpacker, et des modules l'utilisant
         * Update de Speedvid
