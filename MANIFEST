@@ -37,6 +37,7 @@ lib/Pstreamer/Site/Skstream.pm
 lib/Pstreamer/Site/SokroStream.pm
 lib/Pstreamer/Site/Streamay.pm
 lib/Pstreamer/Site/StreamingSeriescx.pm
+lib/Pstreamer/Site/ZoneTelechargement.pm
 lib/Pstreamer/UI/Curses.pm
 lib/Pstreamer/UI/Gtk.pm
 lib/Pstreamer/UI/Text.pm
@@ -66,4 +67,5 @@ t/13-papystreaming.t
 t/14-skstream.t
 t/15-streamingseriescx.t
 t/16-streamay.t
+t/17-zonetelechargement.t
 xt/boilerplate.t
