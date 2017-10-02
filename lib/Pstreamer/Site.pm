@@ -20,6 +20,7 @@ my %sites = (
     Papystreaming       => "Pstreamer::Site::PapyStreaming",
     Skstream            => "Pstreamer::Site::Skstream",
     Streamay            => "Pstreamer::Site::Streamay",
+    Zone_telechargement => "Pstreamer::Site::ZoneTelechargement",
 );
 
 ###########################
