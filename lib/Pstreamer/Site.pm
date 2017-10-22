@@ -13,7 +13,7 @@ use Moo;
 my %sites = (
     # name => "PackageName",
     sample              => "Pstreamer::Site::Sample",
-    Streaming_series_cx => "Pstreamer::Site::StreamingSeriescx",
+    Serie_Streaming     => "Pstreamer::Site::StreamingSeriescx",
     Sokrostream         => "Pstreamer::Site::SokroStream",
     Librestream         => "Pstreamer::Site::LibreStream",
     Radego              => "Pstreamer::Site::Radego",
