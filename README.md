@@ -1,6 +1,6 @@
 ## Pstreamer::App - Application de streaming vidéo
 
-    Version 0.012
+    Version 0.013
 
 ## DESCRIPTION
 
