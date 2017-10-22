@@ -11,22 +11,25 @@ use Moo;
 
 with 'Pstreamer::Role::Site','Pstreamer::Role::UA','Pstreamer::Role::UI';
 
-has '+url' => ( default => 'http://www.streaming-series.cx/' );
+has '+url' => ( default => 'http://www.serie-streaming.watch/' );
 
 has '+menu' => ( default => sub { {
     'Accueil'      => '/',
-    'Action'       => '/category/action/',
-    'Animation'    => '/category/animation/',
-    'Comédie'      => '/category/comedie/',
-    'Documentaire' => '/category/documentaire/',
-    'Epouvante'    => '/category/epouvante-horreur/',
-    'Fantastique'  => '/category/fantastique/',
+    'Action'       => '/category/series/action/',
+    'Animation'    => '/category/series/animation/',
+    'Comédie'      => '/category/series/comedie/',
+    'Documentaire' => '/category/series/documentaire/',
+    'Epouvante'    => '/category/series/epouvante-horreur/',
+    'Fantastique'  => '/category/series/fantastique/',
 } } );
 
 
 sub search {
     my ( $self, $text ) = @_;
-    return $self->ua->get( $self->url => form => { s => $text } );
+    return $self->ua->get( $self->url => form => {
+        s => $text,
+        action => "keremiya_search_text",
+    } );
 }
 
 sub get_results {
@@ -40,10 +43,10 @@ sub get_results {
         if ( /\?s=.*/ ) {
             @results = $self->_get_results( $dom );
         }
-        elsif( /-streaming.*\/\d+\/$/ ) {
+        elsif( /-streaming\/\d+\/$/ ) {
             @results = $self->_get_serie_links( $dom );
         }
-        elsif( /-streaming.*\/$/ ){
+        elsif( /-streaming\/$/ ){
             @results = $self->_get_serie_infos( $dom );
         }
         else { 
@@ -58,7 +61,7 @@ sub _get_results {
     my ( $self, $dom ) = @_;
     my @results;
 
-    @results = $dom->find('.movief a')
+    @results = $dom->find('.title a')
         ->map( sub { { 
             url => $_->attr('href'),
             name => $_->text =~ s/\sStreaming//r,
@@ -90,11 +93,11 @@ sub _get_serie_links {
     my ( $self, $dom ) = @_;
     my @results;
 
-    @results = $dom->find('.filmicerik iframe')
+    @results = $dom->find('.video-container iframe')
         ->map( sub { [
             $_->attr('src'),
-            $_->previous->text =~ s/Lecteur\s//r,
-            $_->parent->at('.lg')->text =~ s/.*\((.+)\)/$1/r,
+            $_->parent->at('.myLecteur>b')->text =~ s/Lecteur\s//r,
+            $_->parent->parent->at('.lg')->text =~ s/.*\((.+)\)/$1/r,
         ] } )
         ->map( sub { {
             url => $self->url,
