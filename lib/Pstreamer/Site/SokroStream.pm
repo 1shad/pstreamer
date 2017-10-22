@@ -7,13 +7,14 @@ package Pstreamer::Site::SokroStream;
 =cut
 
 use utf8;
+use Pstreamer::Util::CloudFlare;
 use Mojo::URL;
 use Mojo::Util 'trim';
 use Moo;
 
 with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
 
-has '+url' => ( default => 'http://sokrostream.cc/' );
+has '+url' => ( default => 'http://sokrostream.ws/' );
 
 has '+menu' => ( default => sub { { 
     'Accueil'                => '/',
@@ -27,9 +28,17 @@ has '+menu' => ( default => sub { {
 sub search {
     my ( $self, $text ) = @_;
     my $headers = { Referer => $self->url };
+    my $cf = Pstreamer::Util::CloudFlare->new;
+    
     my $tx = $self->ua->get( 
         $self->url."search.php" => $headers  => form => { q => $text }
     );
+    
+    if( $cf->is_active($tx) ){
+        $tx = $cf->bypass;
+        $tx = $self->ua->get( $tx->req->url => $headers );
+    }
+    
     return $tx;
 }
 
