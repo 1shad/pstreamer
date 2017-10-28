@@ -25,6 +25,7 @@ has '+menu' => ( default => sub { {
     'Les mieux notés'        => "films-les-mieux-notes-2",
 } } );
 
+#------[ SEARCH ]----------------------------------------------------
 sub search {
     my ( $self, $text ) = @_;
     my $headers = { Referer => $self->url };
@@ -42,6 +43,7 @@ sub search {
     return $tx;
 }
 
+#-------[ GET RESULTS ]----------------------------------------------
 sub get_results {
     my ( $self, $tx ) = @_;
     my ( $dom, @results);
@@ -64,7 +66,7 @@ sub get_results {
         }
         elsif(  /serie\// || /films\// ) {
             if ( defined $self->{params} ){
-                @results = $self->_decode_link( $dom );
+                @results = $self->_decode_link( $dom, $_ );
             } else {
                 @results = $self->_get_links( $dom );
             }
@@ -74,6 +76,7 @@ sub get_results {
     return @results;
 }
 
+#-------[ SEARCH RESULTS ]-------------------------------------------
 sub _search_results {
     my ( $self, $dom, $param ) = @_;
     my ( @results, $title ) = ( undef, undef );
@@ -111,18 +114,19 @@ sub _search_results {
     return @results;
 }
 
+#-------[ GET LINKS ]------------------------------------------------
 sub _get_links {
     my ( $self, $dom ) = @_;
     my ( $url, @results );
-
+    
     $url = $dom->at('link[rel="canonical"]')->attr('href');
     
-    @results = $dom->find('form[action="#playfilm"]')
+    @results = $dom->find('li.seme')
         ->map('find', 'img,input')
         ->map( sub { [
             trim( $$_[0]->parent->text ),
             $$_[1]->attr('src') =~ s/.*\/(.+)\.png$/uc($1)/er,
-            $$_[2]->attr('value')
+            $$_[0]->parent->parent->parent->attr('data-iframe'),
         ] } )
         ->map( sub { {
             name   => $$_[0].' - '.$$_[1],
@@ -130,47 +134,28 @@ sub _get_links {
             url    => $url,
         } } )
         ->each;
-
+    
     return @results;
 }
 
+#-------[ DECODE LINK ]----------------------------------------------
 sub _decode_link {
-    my ( $self, $dom ) = @_;
+    my ( $self, $dom, $u  ) = @_;
     my ( $url, $tx, $param, $iframe, $headers, @result );
-
+    
     $param = $self->{params};
     $self->{params} = undef;
-
-    $url = $dom->at('link[rel="canonical"]')->attr('href');
     
-    if ( $param ne "29702") {
-        $url.="#playfilm";
-        $tx = $self->ua->post( $url => form => { 
-            levideo => $param, 
-        } );
-        if ( $tx->success ) {
-            $dom = $tx->res->dom;
-        } else { return (); }
-    }
+    $headers = { Referer => $u };
+    $tx = $self->ua->get( $param, $headers );
+    return () unless $tx->success;
+    ($url) = $tx->res->dom =~ /url=([^"]+)/;
     
-    $headers = { Referer => $url };
-    
-    $iframe = $dom->at('iframe');
-    return () unless $iframe;
-    $url = $iframe->attr('src');
-    
-    if ($url =~ /sokrostrem\.xyz/ ) {
-        $tx = $self->ua->get($url => $headers );
-        if ( $tx->success ) {
-            ($url) = $tx->res->dom =~ /url=([^"]+)/;
-        } else { return (); }
-    }
-
     push( @result, { url => $url, name => "sokro" } );
-
     return @result;
 }
 
+#-------[ FIND NEXT PAGE ]-------------------------------------------
 sub _find_next_page {
     my ( $self, $dom ) = @_;
     my ( $next, $name, @result );
