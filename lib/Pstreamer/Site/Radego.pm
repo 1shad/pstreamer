@@ -77,7 +77,7 @@ sub _get_default_results {
 
 sub _get_article_results {
     my ( $self, $dom, $url ) = @_;
-    my ( $headers, $json, $tx, @results );
+    my ( $headers, $html, $json, $tx, @results );
     
     # get iframe src
     $url = $dom->at('iframe')->attr('src');
@@ -86,11 +86,19 @@ sub _get_article_results {
     $headers = { Referer => $url };
     $url = Mojo::URL->new($url)->to_abs($self->url);
     $tx = $self->ua->get($url => $headers);
-    
+
+    $html = $tx->res->dom =~ s/[\n\s\t\r]//gr;
     # get and decode json sources
-    ($json) = $tx->res->dom =~ /sources:\s?(\[.*?\]),/;
+    ($json) = $html =~ /sources:\s?(\[.*?\]),/;
     return () unless $json;
+    # prepare json string
+    $json =~ s/(file|label|type)/"$1"/g;
+    $json =~ s/'/"/g;
+    $json =~ s/,(}|])/$1/g;
+    # decode
     $json = decode_json( $json );
+    # filter
+    $json = [ grep{ $_->{file} ne "" } @{$json} ];
 
     # each file is redirected
     for ( @{$json} ) {
