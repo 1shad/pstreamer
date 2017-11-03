@@ -15,7 +15,7 @@ use Moo;
 
 with 'Pstreamer::Role::Site','Pstreamer::Role::UA';
 
-has '+url' => ( default => 'http://www.skstream.co/' );
+has '+url' => ( default => 'http://www.skstream.ws/' );
 
 has '+menu' => ( default => sub { {
     'Accueil' => '/',
