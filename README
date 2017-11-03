@@ -2,7 +2,7 @@ NAME
     Pstreamer::App - Application de streaming vidéo
 
 VERSION
-     Version 0.014
+     Version 0.015
 
 DESCRIPTION
     Pstreamer permet de visionner des films ou des series, en streaming,
