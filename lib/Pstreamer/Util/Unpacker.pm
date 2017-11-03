@@ -46,7 +46,8 @@ sub _decode{
     my ( $result, $digit ) = (0, 0);
     
     if( 2 <= $radix && $radix <= 10 ){
-        $result = $keywords->[$dict->{$word}];
+        #$result = $keywords->[$dict->{$word}];
+        $result = $keywords->[$word];
         return $result eq "" ? $word : $result;
     }
 
