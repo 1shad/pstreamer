@@ -41,10 +41,14 @@ sub get_filename{
     $dom = $tx->result->dom;
     $dom = html_unescape( $dom );
 
+    # try to find the adblock check js file
+    ($url) = $dom =~ /src=["\'](.+code\.js\?cache[^"\']+)/;
+    $url = 'https:'.$url if $url =~ /^\/\//;
+
     # load the unlocker js file
     return 0 unless $self->_get_the_js_file( $dom, $id );
     # fake use of javascript. used to test adblock
-    return 0 unless $self->_unadblock;
+    return 0 unless $self->_unadblock( $url );
     
     # Find the link to the next page in the html source
     @links = $dom =~ /href=["'](https*:\/\/www\.flashx[^"']+)/g;
@@ -116,7 +120,7 @@ sub _get_the_js_file {
     };
     
     @t = $dom =~ /src=["\']([^"\']+)/g ;
-    @t = map { 'https:'.$_ } grep { /$id/ } @t;
+    @t = map { $_ =~ /^\/\// ? 'https:'.$_ : $_ } grep { /$id/ } @t;
     return 0 unless @t;
 
     $self->ua->max_redirects(5);
@@ -134,25 +138,30 @@ sub _get_the_js_file {
 
 # get js file and simulate its action
 sub _unadblock {
-    my $self = shift;
+    my ( $self, $url ) = @_;
     my ( $headers, $dom, $tx, @params );
+
+    $url //= 'https://www.flashx.tv/js/code.js';
+    say "UNADBLOCK URL: ". $url if $DEBUG;
     
     $headers = { 
         Referer => 'https://www.flashx.tv/dl?playthis',
     };
     
-    $tx = $self->ua->get('https://www.flashx.tv/js/code.js' => $headers);
+    $tx = $self->ua->get( $url => $headers);
     return 0  if !$tx->success;
 
     $dom = $tx->res->dom;
     $dom = html_unescape($dom);
     
-    @params = $dom =~ /!= null\)\{\n?\s*\$.get\('(.+?)',\s*{(.+?):\s*'(.+?)'\}/;
-    
+    @params = $dom =~
+        /!= null\)\{\n?\s*\$.get\('(.+?)',\s*{(.+?):\s*'(.+?)',\s*(.+?):\s*'(.+?)'\}/;
+
     if ( @params ){
-        $tx = $self->ua->get(
-            $params[0] => $headers => form => { $params[1] => $params[2] }
-        );
+        $tx = $self->ua->get( $params[0] => $headers => form => {
+            $params[1] => $params[2],
+            $params[3] => $params[4],
+        });
         say "UNADBLOCK: YES" if $tx->success and $DEBUG;
         return $tx->success;
     }
