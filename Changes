@@ -1,5 +1,10 @@
 Revision history for pstreamer
 
+0.015   Fri, 03 Nov 2017
+        * Update FlashX
+        * Update Speedvid
+        * Update Skstream, hostname
+
 0.014   Sat, 28 Oct 2017
         * Update sokrostream, liens videos
         * Update Radego, liens videos
