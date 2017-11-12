@@ -29,7 +29,6 @@ sub get_filename {
     $cf = Pstreamer::Util::CloudFlare->new;
     $tx = $self->ua->get( $url );
     $tx = $cf->bypass if $cf->is_active( $tx );
-    $tx = $self->ua->get( $url );
 
     # In case of redirection
     while ( $tx->res->code == 302 ) {
@@ -38,21 +37,19 @@ sub get_filename {
     }
 
     $dom = $tx->result->dom;
-    # Delete Windows garbages ...
     $dom =~ s/\r\n//g;
+    $dom =~ s/(<\/SCRIPT>(-->)?)/<$1\n\n/gi;
+    $dom =~ s/<!--.*?-->//g;
     
     # - Needed for debug -
     #
-    #$dom =~ s/(<\/SCRIPT>(-->)?)/<$1\n\n/gi;
-    #$dom =~ s/<!--.*?-->//g;
-    #
     # Find packets javascripts, and replace it unpacked
     #while ( $dom =~ /(eval\(function\(p,a,c,k,e(?:.|\s)+?\)\))</g ) {
-    #    $js = $1;
-    #    while (  $js =~ /eval\(function\(p,a,c,k,e(?:.|\s)+?\)\)/ ) { 
-    #        $js = jsunpack( \$js );
-    #    }
-    #    $dom =~ s/eval\(function\(p,a,c,k,e(?:.|\s)+?\)\)</$js</;
+        #$js = $1;
+        #while (  $js =~ /eval\(function\(p,a,c,k,e(?:.|\s)+?\)\)/ ) { 
+            #$js = jsunpack( \$js );
+        #}
+        #$dom =~ s/eval\(function\(p,a,c,k,e(?:.|\s)+?\)\)</$js</;
     #}
 
     # find the aaencoded javascript and unpack it
@@ -60,9 +57,7 @@ sub get_filename {
     return 0 unless $js;
 
     # set up the 'ma' var cookie value
-    my $expires = time + 24*60*60*1000;
-    my $ma = (int( (900-100)*rand ) + 100 )*( time*(128/4) );
-    $ma = "". $ma . $expires;
+    my $ma = (int(rand(800))+100) * (int(rand(1000))+(time * 1000)) * (128/4);
     say 'MA = ' . $ma if $DEBUG;
     
     # To avoid duplicates in the cookie, as it already exists,
@@ -108,8 +103,6 @@ sub _get_id {
     return $id;
 }
 ####
-# Let's customise aadecode for this site. -`Oo -
-# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 # It finds and returns the decoded aaencoded javascript
 # found in $text. 
 # Otherwise it returns 0 or undef if not found
@@ -136,7 +129,7 @@ sub aadecode {
     $aa =~ s/\Q(o^_^o)/3/g;
     $aa =~ s/\Q(c^_^o)/0/g;
 
-    # replacements
+    # replacements, ex: (1) -> 1
     $aa =~ s/\((\d)\)/$1/g;
 
     # eval maths
