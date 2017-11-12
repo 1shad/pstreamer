@@ -139,14 +139,12 @@ sub _get_the_js_file {
 # get js file and simulate its action
 sub _unadblock {
     my ( $self, $url ) = @_;
-    my ( $headers, $dom, $tx, @params );
+    my ( $headers, $dom, $tx, @params, %form );
 
     $url //= 'https://www.flashx.tv/js/code.js';
     say "UNADBLOCK URL: ". $url if $DEBUG;
     
-    $headers = { 
-        Referer => 'https://www.flashx.tv/dl?playthis',
-    };
+    $headers = { Referer => 'https://www.flashx.tv/dl?playthis' };
     
     $tx = $self->ua->get( $url => $headers);
     return 0  if !$tx->success;
@@ -154,19 +152,15 @@ sub _unadblock {
     $dom = $tx->res->dom;
     $dom = html_unescape($dom);
     
-    @params = $dom =~
-        /!= null\)\{\n?\s*\$.get\('(.+?)',\s*{(.+?):\s*'(.+?)',\s*(.+?):\s*'(.+?)'\}/;
+    @params = $dom =~ /!= null\)\{\n?\s*\$.get\('(.+?)',\s*\{(.+?)\}/;
+    return 0 unless @params;
+    
+    $url = $params[0];
+    %form = $params[1] =~ /\{?\s*([^:]+?):\s*'([^']+?)',?/g;
 
-    if ( @params ){
-        $tx = $self->ua->get( $params[0] => $headers => form => {
-            $params[1] => $params[2],
-            $params[3] => $params[4],
-        });
-        say "UNADBLOCK: YES" if $tx->success and $DEBUG;
-        return $tx->success;
-    }
-
-    return 0;
+    $tx = $self->ua->get( $url => $headers => form => \%form );
+    say "UNADBLOCK: YES" if $tx->success and $DEBUG;
+    return $tx->success;
 }
 
 1;
