@@ -7,43 +7,22 @@ package Pstreamer::Site::SokroStream;
 =cut
 
 use utf8;
-use Pstreamer::Util::CloudFlare;
 use Mojo::URL;
-use Mojo::Util 'trim';
+use Mojo::Util qw(encode url_escape);
+use Mojo::JSON 'decode_json';
 use Moo;
 
 with 'Pstreamer::Role::Site', 'Pstreamer::Role::UA';
 
-has '+url' => ( default => 'http://sokrostream.ws/' );
+has '+url' => ( default => 'http://sokrostream.tv/' );
 
-has '+menu' => ( default => sub { { 
-    'Accueil'                => '/',
-    'Films derniers ajouts'  => "/categories/films-streaming",
-    'Series derniers ajouts' => "/categories/series-streaming",
-    'Les plus vues'          => "/les-films-les-plus-vues-2",
-    'Les plus commentés'     => "/les-films-les-plus-commentes-2",
-    'Les mieux notés'        => "films-les-mieux-notes-2",
+has '+menu' => ( default => sub { {
+    'Accueil' => '/',
+    'Films'   => '/categories/films-streaming',
+    'Series'  => '/categories/series-streaming',
 } } );
 
-#------[ SEARCH ]----------------------------------------------------
-sub search {
-    my ( $self, $text ) = @_;
-    my $headers = { Referer => $self->url };
-    my $cf = Pstreamer::Util::CloudFlare->new;
-    
-    my $tx = $self->ua->get( 
-        $self->url."search.php" => $headers  => form => { q => $text }
-    );
-    
-    if( $cf->is_active($tx) ){
-        $tx = $cf->bypass;
-        $tx = $self->ua->get( $tx->req->url => $headers );
-    }
-    
-    return $tx;
-}
-
-#-------[ GET RESULTS ]----------------------------------------------
+#_______/ GET RESULTS \______________________________________________
 sub get_results {
     my ( $self, $tx ) = @_;
     my ( $dom, @results);
@@ -52,121 +31,263 @@ sub get_results {
     $dom = $tx->result->dom;
 
     for ( $tx->req->url ) {
-        if   ( /\?q=.*/  ) {
-            @results = $self->_search_results( $dom, "default" );
+        if   ( /search\//  ) {
+            @results = $self->_get_search( $dom );
         }
         elsif( /categories\//){
-            @results = $self->_search_results( $dom, "default" );
+            @results = $self->_get_categories( $dom );
         }
-        elsif( /series\// ) {
-            @results = $self->_search_results( $dom, "saisons" );
+        elsif(     /films\/[^\/]+\.html/ 
+                or /series\/[^\/]+saison[^\/]+episode[^\/]+\.html/ ) {
+            @results = $self->_get_hosts( $dom );
         }
-        elsif( /series-tv\// ) {
-            @results = $self->_search_results( $dom, "episodes" );
+        elsif( /series\/[^\/]+saison[^\/]+\.html/ ) {
+            @results = $self->_get_episodes( $dom );
         }
-        elsif(  /serie\// || /films\// ) {
-            if ( defined $self->{params} ){
-                @results = $self->_decode_link( $dom, $_ );
-            } else {
-                @results = $self->_get_links( $dom );
-            }
+        elsif( /series\/[^\/]+\.html/ ) {
+            @results = $self->_get_seasons( $dom );
         }
-        else { @results = $self->_search_results( $dom, "default" ); }
+        else {
+            @results = $self->_get_home( $dom );
+        }
     }
     return @results;
 }
 
-#-------[ SEARCH RESULTS ]-------------------------------------------
-sub _search_results {
-    my ( $self, $dom, $param ) = @_;
-    my ( @results, $title ) = ( undef, undef );
+#_______/ SEARCH \___________________________________________________
+sub search {
+    my ( $self, $text ) = @_;
+    my ( $headers, $surl, $tx );
     
-    my %pattern = (
-        default => '.movief a',
-        saisons => '.films-container.seasons .movief a',
-        episodes => '.films-container.serie-container .movief2 a',
-    );
+    $headers = { Referer => $self->url };
+    $surl    = $self->_make_absolute( "/search/".url_escape( $text ) );
+    $tx      = $self->ua->get( $surl => $headers );
 
-    if ( $param eq "saisons" or $param eq "episodes" ) {
-        $title = trim( $dom->at('h1')->text );
-        $title =~ s/\sen\sStreaming// ;
+    return $tx;
+}
+
+#_______/ GET HOME \__________________________________________________
+# get results from home page
+sub _get_home {
+    my ( $self, $dom )= @_;
+    my ( $temp, @results );
+    
+    my $datas = $self->_get_datas( $dom );
+
+    foreach my $t ( qw(films series) ) {
+        foreach my $e ( qw(nouveaux box) ) {
+            $temp = $datas->{$e}->{$t};
+            push @results, $self->_generate_results( $temp, $t );
+        }
     }
-
-    my %tr = (
-        'tr-dublaj'  => 'FR',
-        'tr-altyazi' => 'VOSTFR',
-    );
-
-    @results = $dom->find($pattern{$param})
-        ->map( sub { 
-            my $t = $_->parent->next;
-            my $l = $_->parent->parent->at('span');
-            $t = $t->text ? $t->text : undef if $t;
-            $l = $tr{$l->attr('class')}?$tr{$l->attr('class')}:$l->text if $l;
-            {
-                name => join( ' - ', grep defined, $title, $_->text, $l, $t ),
-                url => $_->attr('href'),
-            } 
-        } )
-        ->each;
     
-    push(@results, $self->_find_next_page($dom) );
+    push @results, $self->_next_page( $dom );
     return @results;
 }
 
-#-------[ GET LINKS ]------------------------------------------------
-sub _get_links {
+#_______/ GET HOSTS \________________________________________________
+# Extract hosts video links
+sub _get_hosts {
     my ( $self, $dom ) = @_;
-    my ( $url, @results );
+    my ( $datas, $ep, $name, $videos, @results );
+
+    $datas = $self->_get_datas( $dom );
     
-    $url = $dom->at('link[rel="canonical"]')->attr('href');
+    $ep  = "";
+    $ep .= "s".$datas->{season}  if exists( $datas->{season}  );
+    $ep .= "e".$datas->{episode} if exists( $datas->{episode} );
+
+    $datas = $datas->{data};
+    $name  = $datas->{name};
     
-    @results = $dom->find('li.seme')
-        ->map('find', 'img,input')
-        ->map( sub { [
-            trim( $$_[0]->parent->text ),
-            $$_[1]->attr('src') =~ s/.*\/(.+)\.png$/uc($1)/er,
-            $$_[0]->parent->parent->parent->attr('data-iframe'),
-        ] } )
-        ->map( sub { {
-            name   => $$_[0].' - '.$$_[1],
-            params => $$_[2],
-            url    => $url,
+    $datas  = $datas->{episode}->[0] if exists( $datas->{episode} );
+    $videos = $datas->{videos};
+
+    foreach my $e ( @{$videos} ) {
+        my $n = join( ' - ', grep{ $_ }
+            ($name, $ep, $e->{quality}, $e->{language}, $e->{provider})
+        );
+        push( @results, { name => $n, url => $e->{link} } );
+    }
+
+    return @results;
+}
+
+#_______/ GET SEASONS \______________________________________________
+# Extract seasons links
+sub _get_seasons {
+    my ( $self, $dom ) = @_;
+    my ( $datas, $name, $qual, @results );
+
+    $datas = $self->_get_datas( $dom );
+    $name  = $datas->{data}->{name};
+    $qual  = $datas->{data}->{quality};
+    
+    @results = $dom->find('.box .is-3 a button')
+        ->map( sub{ {
+            name => join(' - ', $name, $_->text, $qual),
+            url  => $self->_make_absolute($_->parent->attr('href'))
         } } )
         ->each;
     
     return @results;
 }
 
-#-------[ DECODE LINK ]----------------------------------------------
-sub _decode_link {
-    my ( $self, $dom, $u  ) = @_;
-    my ( $url, $tx, $param, $iframe, $headers, @result );
-    
-    $param = $self->{params};
-    $self->{params} = undef;
-    
-    $headers = { Referer => $u };
-    $tx = $self->ua->get( $param, $headers );
-    return () unless $tx->success;
-    ($url) = $tx->res->dom =~ /url=([^"]+)/;
-    
-    push( @result, { url => $url, name => "sokro" } );
-    return @result;
+#_______/ GET EPISODES \_____________________________________________
+# Extract episodes links
+sub _get_episodes {
+    my ( $self, $dom ) = @_;
+    my ( $datas, $name, $season, $qual, @results );
+
+    $datas  = $self->_get_datas( $dom );
+    $season = "Saison " . $datas->{season};
+    $name   = $datas->{data}->{name};
+    $qual   = $datas->{data}->{quality};
+
+    @results = $dom->find('.box .is-3 a button')
+        ->grep( sub { $_->text =~ /Episode/ } )
+        ->map( sub { {
+            name => join(' - ', $name , $season, $_->text, $qual ),
+            url  => $self->_make_absolute($_->parent->attr('href')),
+        } } )
+        ->each;
+
+    return @results;
 }
 
-#-------[ FIND NEXT PAGE ]-------------------------------------------
-sub _find_next_page {
+#_______/ GET CATEGORIES \___________________________________________
+# Extract links in categories pages
+sub _get_categories {
     my ( $self, $dom ) = @_;
-    my ( $next, $name, @result );
+    my ( $datas, $type, @results );
+
+    $datas = $self->_get_datas( $dom );
+    $datas = $datas->{elements};
+
+    # try to find the type of elements ( films or series )
+    foreach my $e ( @{$datas} ) {
+        $type = "films"  if ( $e->{poster} =~ /films/  );
+        $type = "series" if ( $e->{poster} =~ /series/ );
+        last if $type; # stop first time it is found
+    }
+
+    push @results, $self->_generate_results( $datas, $type );
+    push @results, $self->_next_page( $dom );
+
+    return @results;
+}
+
+#_______/ GET SEARCH \_______________________________________________
+# Extract links from search results
+sub _get_search {
+    my ( $self, $dom ) = @_;
+    my ( $datas, @results );
+
+    $datas = $self->_get_datas( $dom );
+
+    foreach my $t ( qw(films series) ) {
+        push @results, $self->_generate_results( $datas->{$t}, $t );
+    }
+
+    return @results;
+}
+
+#_______/ GENERATE RESULTS \_________________________________________
+# Generate the final array required by the ui.
+sub _generate_results {
+    my ( $self, $array, $type ) = @_;
+    my @results;
     
-    $next = $dom->at('.current');
-    return () unless ($next && $next->next);
-    $next = $next->next;
-    $next = Mojo::URL->new($next->attr('href'));
-    $next = $next->to_abs($self->url) unless $next->is_abs;
-    $name = $next =~ s/.*(page)\/(.*)/$1 $2/r;
-    push(@result, { name => ">> ".$name, url => $next->to_string } );
+    foreach ( @{$array} ) {
+        my $name = $self->_generate_name( $_, $type );
+        my $url  = $self->_generate_url( $_, $type );
+        push( @results, { url => $url, name => $name } ); 
+    }
+
+    return @results;
+}
+
+#_______/ GET DATAS \________________________________________________
+# Extract vue.js datas from html source
+sub _get_datas {
+    my ( $self, $html ) = @_;
+
+    my ($datas) = $html =~ /window\.__NUXT__=(.*?);<\/script>/;
+    return unless $datas;
+
+    $datas = encode( 'utf-8', $datas );
+    $datas = decode_json( $datas );
+
+    return $datas->{'data'}->[0];
+}
+
+#_______/ GENERATE URL  \____________________________________________
+# Generate url from a data element with a defined type
+# ( type => series(tv shows) or films )
+sub _generate_url {
+    my ( $self, $e, $type ) = @_;
+    return "" unless $e;
+
+    my $url = $e->{name};
+    
+    $url =~ s/[ëèéê]/e/g;
+    $url =~ s/[âäà]/a/g;
+    $url =~ s/[ùûü]/u/g;
+    $url =~ s/[öô]/o/g;
+    $url =~ s/[ïî]/i/g;
+    $url =~ s/ç/c/g;
+    $url =~ s/[#!&:,-]//g;
+    $url =~ s/\s+$//;
+    $url =~ s/[\'\/%]|\s+/-/g;
+    $url = "/$type/".lc($url)."-".$e->{customID}.".html";
+    
+    $url = $self->_make_absolute( $url );
+    return $url;
+}
+
+#_______/ GENERATE NAME \____________________________________________
+# Generate the name displayed by the ui from a data element
+sub _generate_name {
+    my ( $self, $e, $type ) = @_;
+    return "" unless $e;
+
+    my $name = $e->{name}." - ".uc($e->{language})." - ".uc($e->{quality});
+
+    if ( $type ) {
+        my $c = substr( $type, 0, 1 );
+        $name = '('.uc($c).') '.$name;
+    }
+
+    return $name;
+}
+
+#_______/ MAKE ABSOLUTE \____________________________________________
+# return absolute url
+sub _make_absolute {
+    my ( $self, $u ) = @_;
+    return Mojo::URL->new($u)->to_abs($self->url)->to_string;
+}
+
+#_______/ NEXT PAGE \________________________________________________
+# Find the next page link if any
+sub _next_page {
+    my ( $self, $dom ) = @_;
+    my ( $next, @result );
+
+    $next = $dom->at('.pagination-link.is-current');
+    return () unless $next;
+
+    $next = $next->parent->next();
+    return () unless $next;
+
+    $next = $next->at('a');
+    return () unless $next;
+    
+    push( @result, {
+        name => ">> page ".$next->text,
+        url  => $self->_make_absolute( $next->attr('href') ),
+    });
+
     return @result;
 }
 
@@ -177,3 +298,4 @@ sub _find_next_page {
  L<Pstreamer::App>
 
 =cut
+
