@@ -20,10 +20,13 @@ sub get_filename {
     my ( $self, $url ) = @_;
     my ( $cf, $tx, $id, $dom, $js, $file, $headers );
 
-    say 'URL: '. $url if $DEBUG;
+    say 'BASE URL: '. $url if $DEBUG;
 
     $id = $self->_get_id($url);
     say 'ID: ' . $id if $DEBUG;
+    
+    $url = "http://www.speedvid.net/embed-".$id."-640x360.html"; 
+    say 'MODE URL: '. $url if $DEBUG;
 
     # Get url and bypass CloudFlare if active
     $cf = Pstreamer::Util::CloudFlare->new;
@@ -82,6 +85,11 @@ sub get_filename {
     return 0 unless $tx->success;
     $dom = $tx->res->dom;
     
+    # If the file url is already present in the code
+    ($file) = $dom =~ /file:\s*\'([^']+.mp4)/;
+    return $file if $file;
+    
+    # Else try to find it in an encrypted javascript code
     # Find the latest encrypted javascript and unpack it
     while ( $dom =~ /(eval\(function\(p,a,c,k,e(?:.|\s)+?\)\))\n?</g ) {
         $js = $1;
@@ -91,15 +99,18 @@ sub get_filename {
     }
     
     return 0 unless $js;
-
-    # Tadaa
     ($file) = $js =~ /{file:.([^']+.mp4)/;
+    
     return $file?$file:0;
 }
 ####
+# ex:
+#   http://www.speedvid.net/6icofkxsp7at
+#   http://speedvid.net/embed-0jcqnb4jg8r6.html
+#   http://www.speedvid.net/embed-".$id."-640x360.html
 sub _get_id {
     my ( $self, $url ) = @_;
-    ( my $id ) = $url =~ /embed-([^-|^\.]+)/;
+    ( my $id ) = $url =~ /\/(?:embed-)?(\w+)(?:-\d+x\d+)?(?:\.html)?$/;
     return $id;
 }
 ####
