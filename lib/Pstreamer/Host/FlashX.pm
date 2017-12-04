@@ -96,9 +96,13 @@ sub _set_url {
 }
 
 # get id from url
+# ex:
+#   https://www.flashx.tv/jxy0qbod5cqk.html
+#   http://flashx.tv/embed-a0vacnfe4edo-816x459.html
+#
 sub _get_id {
     my ( $self, $url ) = @_;
-    my ($id) = $url =~ /.*\/\w+-(\w+).*$/;
+    my ($id) = $url =~ /.*\/(?:\w+-)?(\w+).*$/;
     return $id;
 }
 
