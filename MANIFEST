@@ -18,6 +18,7 @@ lib/Pstreamer/Host/Sample.pm
 lib/Pstreamer/Host/Speedvid.pm
 lib/Pstreamer/Host/Streamango.pm
 lib/Pstreamer/Host/Streamin.pm
+lib/Pstreamer/Host/Thevideo.pm
 lib/Pstreamer/Host/Uptostream.pm
 lib/Pstreamer/Host/Vidabc.pm
 lib/Pstreamer/Host/Vidlox.pm
