@@ -39,6 +39,7 @@ my %hosters = (
     hqq            => 'Pstreamer::Host::Netu',
     waaw           => 'Pstreamer::Host::Netu',
     'flashx.tv'    => 'Pstreamer::Host::FlashX',
+    'thevideo.me'  => 'Pstreamer::Host::Thevideo',
 );
 
 ########################################
