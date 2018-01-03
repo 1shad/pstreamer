@@ -236,7 +236,7 @@ sub _generate_url {
     $url =~ s/[öô]/o/g;
     $url =~ s/[ïî]/i/g;
     $url =~ s/ç/c/g;
-    $url =~ s/[#!&:,-]//g;
+    $url =~ s/[#!&:,]//g;
     $url =~ s/\s+$//;
     $url =~ s/[\'\/%]|\s+/-/g;
     $url = "/$type/".lc($url)."-".$e->{customID}.".html";
