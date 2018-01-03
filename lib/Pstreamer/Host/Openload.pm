@@ -57,7 +57,7 @@ JS1
     $mech->get($url);
 
     $dom = Mojo::DOM->new( $mech->content );
-    $file = $dom->at('#streamurl');
+    $file = $dom->at('#streamuri');
     return 0 unless $file;
     
     $file = 'https://openload.co/stream/'.$file->text.'?mime=true';
