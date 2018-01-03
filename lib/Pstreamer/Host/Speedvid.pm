@@ -86,7 +86,7 @@ sub get_filename {
     $dom = $tx->res->dom;
     
     # If the file url is already present in the code
-    ($file) = $dom =~ /file:\s*\'([^']+.mp4)/;
+    ($file) = $dom =~ /file\s*:\s*\'([^']+.mp4)/;
     return $file if $file;
     
     # Else try to find it in an encrypted javascript code
