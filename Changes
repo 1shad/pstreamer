@@ -1,5 +1,10 @@
 Revision history for pstreamer
 
+0.020   Wed, 03 Jan 2018
+        * Update Sokrostream
+        * Update Openload
+        * Update Speedvid
+
 0.019   Tue, 05 Dec 2017
         * Ajout de Thevideo
 
