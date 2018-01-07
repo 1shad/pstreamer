@@ -59,7 +59,7 @@ JS1
 
     $dom = Mojo::DOM->new( $mech->content );
     
-    foreach ( ('#streamrul', '#streamuri', '#streamurj') ) {
+    foreach ( ('#streamurl', '#streamuri', '#streamurj') ) {
         $id = $dom->at( $_ ) and last if $dom->at( $_ );
     }
     return 0 unless $id;
