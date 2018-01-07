@@ -10,6 +10,7 @@ use Mojo::DOM;
 use Class::Inspector;
 use IPC::Cmd 'can_run';
 use Moo;
+use Data::Dumper;
 
 with 'Pstreamer::Role::UA','Pstreamer::Role::UI';
 
@@ -36,7 +37,7 @@ around get_filename => sub {
 
 sub get_filename {
     my ( $self, $url ) = @_;
-    my ( $dom, $file, $mech );
+    my ( $dom, $file, $id, $mech );
     
     $self->status("PhantomJS en cours");
     $mech = WWW::Mechanize::PhantomJS->new;
@@ -57,11 +58,13 @@ JS1
     $mech->get($url);
 
     $dom = Mojo::DOM->new( $mech->content );
-    $file = $dom->at('#streamuri');
-    return 0 unless $file;
     
-    $file = 'https://openload.co/stream/'.$file->text.'?mime=true';
-
+    foreach ( ('#streamrul', '#streamuri', '#streamurj') ) {
+        $id = $dom->at( $_ ) and last if $dom->at( $_ );
+    }
+    return 0 unless $id;
+    
+    $file = 'https://openload.co/stream/'.$id->text.'?mime=true';
     return $file;
 }
 
