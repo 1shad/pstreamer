@@ -30,7 +30,11 @@ has '+menu' => ( default => sub { {
 
 sub search {
     my ( $self, $text ) = @_;
-    my $headers = { Referer => $self->url };
+    my $headers = {
+        Referer => $self->url,
+        'X-Requested-With' => 'XMLHttpRequest',
+    };
+
     return $self->ua->post( $self->url.'search'
         => $headers 
         => form => { k => $text } 
@@ -87,11 +91,12 @@ sub get_results {
 #
 sub _get_search {
     my ( $self, $dom ) = @_;
-    my ( $json, @results );
+    my ( $json, @tmp, @results );
     
     $dom =~ s/<.*?>//g;
     $dom = html_unescape( $dom );
     $json = decode_json( $dom );
+    return () unless ref($json) eq 'ARRAY';
 
     foreach my $i ( @$json ) {
         push( @results, {
