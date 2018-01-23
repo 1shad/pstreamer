@@ -77,8 +77,11 @@ sub _get_default_results {
 
 sub _get_article_results {
     my ( $self, $dom, $url ) = @_;
-    my ( $headers, $html, $json, $tx, @results );
+    my ( $headers, $html, $title, $json, $tx, @results );
     
+    # get title name
+    $title = $dom->at('.contentheading>span');
+    $title = $title ? trim($title->text) : 'Google';
     # get iframe src
     $url = $dom->at('iframe')->attr('src');
     
@@ -115,7 +118,8 @@ sub _get_article_results {
     # files are played directly
     @results = map { {
         url    => $_->{file},
-        name   => join( ' - ','Google', $_->{type}, $_->{label} ),
+        #name   => join( ' - ','Google', $_->{type}, $_->{label} ),
+        name   => join( ' - ', $title, $_->{type}, $_->{label} ),
         stream => 1,
     } } @{$json};
     
