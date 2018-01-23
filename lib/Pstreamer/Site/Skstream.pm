@@ -15,7 +15,7 @@ use Moo;
 
 with 'Pstreamer::Role::Site','Pstreamer::Role::UA';
 
-has '+url' => ( default => 'http://www.skstream.ws/' );
+has '+url' => ( default => 'http://www.skstream.biz/' );
 
 has '+menu' => ( default => sub { {
     'Accueil' => '/',
@@ -104,12 +104,17 @@ sub _get_seasons {
 sub _get_hosters_links {
     my ( $self, $dom, $uri ) = @_;
     my @results;
+    my $title;
+    
+    $title = $dom->at('.jumbotron>span');
+    $title = $title ? $title->next->text : "";
+    $title =~ s/(?:regarder en)?\s*streaming\s*//gi; 
 
     @results = $dom->find('tr.changeplayer')
         ->map('find', 'td')
         ->map( sub { {
             url  => $_->[0]->parent->attr('data-embedlien'),
-            name => join ' ', map { 
+            name => "$title - " . join ' - ', map { 
                 trim( $_->all_text ) 
             } ( $_->[1], $_->[2], $_->[3] ),
         } } )
