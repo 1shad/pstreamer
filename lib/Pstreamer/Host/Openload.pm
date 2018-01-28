@@ -10,7 +10,6 @@ use Mojo::DOM;
 use Class::Inspector;
 use IPC::Cmd 'can_run';
 use Moo;
-use Data::Dumper;
 
 with 'Pstreamer::Role::UA','Pstreamer::Role::UI';
 
@@ -39,24 +38,24 @@ sub get_filename {
     my ( $self, $url ) = @_;
     my ( $dom, $file, $id, $mech );
     
+    $url = $self->_set_url($url);
+
     $self->status("PhantomJS en cours");
-    $mech = WWW::Mechanize::PhantomJS->new;
+    $mech = WWW::Mechanize::PhantomJS->new();
     $mech->eval_in_phantomjs(<<'JS1', $self->ua->transactor->name);
         var page = this;
         page.settings.userAgent = arguments[0];
-        page.viewportSize = { width: 1680, height: 1050 };
+        page.viewportSize = { width: 1920, height: 1080 };
         page.onInitialized = function() {
             page.evaluate(function() {
                 delete window._mech;
+                delete window._phantom;
                 delete window.callPhantom;
             });
         };
 JS1
     
-    $url = $self->_set_url($url);
-    
     $mech->get($url);
-
     $dom = Mojo::DOM->new( $mech->content );
     
     foreach ( ('#streamurl', '#streamuri', '#streamurj') ) {
@@ -71,7 +70,8 @@ JS1
 sub _set_url {
     my ( $self, $url ) = @_;
     my ($id) = $url =~ /https?:\/\/(?:openload\.(?:co|io)|oload\.tv)\/(?:f|embed)\/([\w\-]+)/;
-    $url = 'https://openload.co/embed/'. $id . '/';
+    #$url = 'https://openload.co/embed/'. $id . '/';
+    $url = 'https://openload.co/f/'. $id . '/';
     return $url;
 }
 
