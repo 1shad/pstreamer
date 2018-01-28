@@ -8,11 +8,11 @@ Pstreamer::App - Application de streaming vidéo
 
 =head1 VERSION
 
- Version 0.022
+ Version 0.023
 
 =cut
 
-our $VERSION = '0.022';
+our $VERSION = '0.023';
 
 use utf8;
 use feature 'say';
@@ -135,7 +135,7 @@ sub proceed {
 
     while ( @list == 1 and !$self->_is_internal( $list[0]->{url} ) ) {
         # breaks recursion if any
-        if ( $one_choice_str =~ /$list[0]->{url}/ ) {
+        if ( $one_choice_str =~ /\Q$list[0]->{url}/ ) {
             @list = @{$self->UI->list};
             last;
         } else {
