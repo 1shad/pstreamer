@@ -32,7 +32,7 @@ sub get_filename{
     $dom = $tx->res->dom;
     
     # find the key
-    ($key) = $dom =~ /lets_play_a_game=\'([^\']+)/;
+    ($key) = $dom =~ /thief=\'([^\']+)/;
     say "KEY: " . $key if $DEBUG;
 
     # find the url part
@@ -60,6 +60,7 @@ sub get_filename{
     say "C: " . $c if $DEBUG;
 
     ($files) = $dom =~ /sources:\s*(\[.*?\]),/;
+    return 0 unless $files;
     $files = decode_json( $files );
     return 0 unless $files;
 
@@ -68,7 +69,7 @@ sub get_filename{
         name   => 'size: '.$_->{label},
         stream => 1,
     } } @{$files} ];
-
+    
     return $files?$files:0;
 }
 
