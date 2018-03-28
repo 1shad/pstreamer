@@ -57,6 +57,7 @@ sub get_filename {
 
     # find the aaencoded javascript and unpack it
     $js = aadecode( $dom );
+    say "JS >> $js" if $DEBUG;
     return 0 unless $js;
 
     # set up the 'ma' var cookie value
@@ -75,9 +76,8 @@ sub get_filename {
     $headers = { Referer => $url };
 
     # Find and set up the new url
-    ($url) = $js =~ /href\s*=\s*["']([^"']+)/;
-    $url = 'http:'.$url if $url =~ /^\/\//;
-    $url = 'http://www.speedvid.net/'.$url if $url !~ /speedvid/;
+    ($url) = $js =~ /["']([^"']+)/;
+    $url = 'http://www.speedvid.net'.$url;
     say 'URL: '. $url if $DEBUG;
 
     # Get it
