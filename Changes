@@ -1,5 +1,10 @@
 Revision history for pstreamer
 
+0.025   Sun, 01 Apr 2018
+        * Suppression de PapyStreaming
+        * Suppression de Sokrostream
+        * Ajout de Papstream
+        
 0.024   Tue, 27 Mar 2018
         * Update Thevideo
         * Update Speedvid
