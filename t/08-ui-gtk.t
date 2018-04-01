@@ -1,6 +1,7 @@
-use Test::More tests => 4;
+use Test::More;
 
-BEGIN {
+BEGIN{
+    unless( $ENV{DISPLAY} ) { plan( skip_all => "X is not active" ); }
     use_ok( Pstreamer::UI::Gtk ) || print "Bail out!\n";
 }
 

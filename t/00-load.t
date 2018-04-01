@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Test::More;
 
-plan tests => 45;
+#plan tests => 45;
 
 BEGIN {
     use_ok( 'Pstreamer::App' ) || print "Bail out!\n";
@@ -25,8 +25,7 @@ BEGIN {
 
     use_ok( 'Pstreamer::Site::LibreStream' );
     use_ok( 'Pstreamer::Site::Radego' );
-    use_ok( 'Pstreamer::Site::SokroStream' );
-    use_ok( 'Pstreamer::Site::PapyStreaming' );
+    use_ok( 'Pstreamer::Site::Papstream' );
     use_ok( 'Pstreamer::Site::Skstream' );
     use_ok( 'Pstreamer::Site::StreamingSeriescx' );
     use_ok( 'Pstreamer::Site::Streamay' );
@@ -56,7 +55,9 @@ BEGIN {
     
     use_ok( 'Pstreamer::UI::Text' );
     use_ok( 'Pstreamer::UI::Curses' );
-    use_ok( 'Pstreamer::UI::Gtk' );
+    use_ok( 'Pstreamer::UI::Gtk' ) if $ENV{DISPLAY};
 }
 
 diag( "Testing Pstreamer::App $Pstreamer::App::VERSION, Perl $], $^X" );
+done_testing();
+
