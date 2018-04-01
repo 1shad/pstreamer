@@ -31,11 +31,10 @@ lib/Pstreamer/Role/UA.pm
 lib/Pstreamer/Role/UI.pm
 lib/Pstreamer/Site.pm
 lib/Pstreamer/Site/LibreStream.pm
-lib/Pstreamer/Site/PapyStreaming.pm
+lib/Pstreamer/Site/Papstream.pm
 lib/Pstreamer/Site/Radego.pm
 lib/Pstreamer/Site/Sample.pm
 lib/Pstreamer/Site/Skstream.pm
-lib/Pstreamer/Site/SokroStream.pm
 lib/Pstreamer/Site/Streamay.pm
 lib/Pstreamer/Site/StreamingSeriescx.pm
 lib/Pstreamer/Site/ZoneTelechargement.pm
@@ -63,8 +62,7 @@ t/07-ui-curses.t
 t/08-ui-gtk.t
 t/10-radego.t
 t/11-librestream.t
-t/12-sokrostream.t
-t/13-papystreaming.t
+t/12-papstream.t
 t/14-skstream.t
 t/15-streamingseriescx.t
 t/16-streamay.t
