@@ -1,5 +1,8 @@
 Revision history for pstreamer
 
+0.026   Mon, 02 Apr 2018
+        * Ajout de SeriesStreamHD
+        
 0.025   Sun, 01 Apr 2018
         * Suppression de PapyStreaming
         * Suppression de Sokrostream
