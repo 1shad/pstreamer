@@ -17,6 +17,7 @@ my %sites = (
     Librestream         => "Pstreamer::Site::LibreStream",
     Radego              => "Pstreamer::Site::Radego",
     Papstream           => "Pstreamer::Site::Papstream",
+    SerieStreamHD       => "Pstreamer::Site::Seriestreamhd",
     Skstream            => "Pstreamer::Site::Skstream",
     Streamay            => "Pstreamer::Site::Streamay",
     Zone_telechargement => "Pstreamer::Site::ZoneTelechargement",
