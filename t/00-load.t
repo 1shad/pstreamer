@@ -26,6 +26,7 @@ BEGIN {
     use_ok( 'Pstreamer::Site::LibreStream' );
     use_ok( 'Pstreamer::Site::Radego' );
     use_ok( 'Pstreamer::Site::Papstream' );
+    use_ok( 'Pstreamer::Site::Seriestreamhd' );
     use_ok( 'Pstreamer::Site::Skstream' );
     use_ok( 'Pstreamer::Site::StreamingSeriescx' );
     use_ok( 'Pstreamer::Site::Streamay' );
