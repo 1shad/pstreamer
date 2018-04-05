@@ -8,11 +8,11 @@ Pstreamer::App - Application de streaming vidéo
 
 =head1 VERSION
 
- Version 0.026
+ Version 0.027
 
 =cut
 
-our $VERSION = '0.026';
+our $VERSION = '0.027';
 
 use utf8;
 use feature 'say';
