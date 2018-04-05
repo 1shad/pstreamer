@@ -15,7 +15,7 @@ with 'Pstreamer::Role::UA','Pstreamer::Role::UI';
 
 around get_filename => sub {
     my $origin = shift;
-    my ( $self ) = @_;  
+    my ( $self ) = @_;
     my $phantom = 'WWW::Mechanize::PhantomJS';
 
     unless( Class::Inspector->loaded( $phantom ) ) {
@@ -25,19 +25,19 @@ around get_filename => sub {
             return undef;
         }
     }
-    
+
     unless( can_run('phantomjs') ) {
         $self->error("Ne peut pas executer phantomjs");
         return undef;
     }
-    
+
     return $origin->( @_ );
 };
 
 sub get_filename {
     my ( $self, $url ) = @_;
     my ( $dom, $file, $id, $mech );
-    
+
     $url = $self->_set_url($url);
 
     $self->status("PhantomJS en cours");
@@ -54,15 +54,26 @@ sub get_filename {
             });
         };
 JS1
-    
+
     $mech->get($url);
     $dom = Mojo::DOM->new( $mech->content );
-    
-    foreach ( ('#streamurl', '#streamuri', '#streamurj') ) {
-        $id = $dom->at( $_ ) and last if $dom->at( $_ );
-    }
+
+    # Il est possible de trouver l'id via cette regex, puis de rechercher
+    # dans la page l'élément avec cet id.
+    # snippet:
+    # ($id) = $dom =~ /#realdl\sa.*?attr.*?stream.*?#([^'"]+)/;
+    # $id = $dom->at('#'.$id);
+
+    # Sinon rechercher directement l'élément via les selecteurs css
+    $id = $dom->at('div[style="display:none;"] > p:first-child + p:last-child');
     return 0 unless $id;
-    
+
+    # - ancien code -
+    # foreach ( ('#streamurl', '#streamuri', '#streamurj') ) {
+    #     $id = $dom->at( $_ ) and last if $dom->at( $_ );
+    # }
+    # return 0 unless $id;
+
     $file = 'https://openload.co/stream/'.$id->text.'?mime=true';
     return $file;
 }
