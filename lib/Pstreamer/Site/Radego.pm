@@ -46,9 +46,9 @@ sub search {
 sub get_results {
     my ( $self, $tx ) = @_;
     my ( @results );
-    
+
     for ( $tx->req->url ) {
-        if ( /\?searchword/ ) { 
+        if ( /\?searchword/ ) {
             @results = $self->_get_search_results($tx->res->dom);
         } elsif ( /&view=article/ ) {
             @results = $self->_get_article_results($tx->res->dom, $_);
@@ -63,9 +63,9 @@ sub get_results {
 sub _get_default_results {
     my ( $self, $dom ) = @_;
     my ( @results );
-    
+
     @results = $dom->find('span[style="list-style-type:none;"] a')
-        ->map( sub { { 
+        ->map( sub { {
             url => Mojo::URL->new($_->attr('href'))->to_abs($self->url),
             name => trim($_->all_text)
         } } )
@@ -77,19 +77,25 @@ sub _get_default_results {
 
 sub _get_article_results {
     my ( $self, $dom, $url ) = @_;
-    my ( $headers, $html, $title, $json, $tx, @results );
-    
+    my ( $headers, $html, $title, $json, $tx, $temp, @results );
+
     # get title name
     $title = $dom->at('.contentheading>span');
     $title = $title ? trim($title->text) : 'Google';
     # get iframe src
     $url = $dom->at('iframe')->attr('src');
-    
+
     # get iframe content
     $headers = { Referer => $url };
     $url = Mojo::URL->new($url)->to_abs($self->url);
     $tx = $self->ua->get($url => $headers);
 
+    # get the first link url in the iframe and get its content
+    $temp = $tx->res->dom->at('a')->attr('href');
+    $url = Mojo::URL->new($temp)->to_abs($url);
+    $tx = $self->ua->get($url => $headers);
+
+    # prepare the html document and get the sources links
     $html = $tx->res->dom =~ s/[\n\s\t\r]//gr;
     # get and decode json sources
     ($json) = $html =~ /sources:\s?(\[.*?\]),/;
@@ -103,7 +109,7 @@ sub _get_article_results {
     # filter
     $json = [ grep{ $_->{file} ne "" } @{$json} ];
 
-    # each file is redirected
+    # resolve the last redirection link from each sources
     for ( @{$json} ) {
         $headers = { Referer => $url };
         while (1) {
@@ -113,25 +119,24 @@ sub _get_article_results {
             $_->{file} = $tx->res->headers->header('location');
         }
     }
-    
+
     # Parse and return results
     # files are played directly
     @results = map { {
         url    => $_->{file},
-        #name   => join( ' - ','Google', $_->{type}, $_->{label} ),
         name   => join( ' - ', $title, $_->{type}, $_->{label} ),
         stream => 1,
     } } @{$json};
-    
+
     return @results;
 }
 
 sub _get_search_results {
     my ( $self, $dom ) = @_;
     my ( @results );
-    
+
     @results = $dom->find('.results a')
-        ->map( sub { { 
+        ->map( sub { {
             url => Mojo::URL->new($_->attr('href'))->to_abs($self->url),
             name => trim($_->all_text)
         } } )
@@ -146,7 +151,7 @@ sub _find_next_page {
 
     $dom = $dom->at('.pagination  a[title="Suivant"]');
     return () unless $dom;
-    push( @result, { 
+    push( @result, {
         url => Mojo::URL->new($dom->attr('href'))->to_abs($self->url),
         name => '>> page suivante' },
     );
