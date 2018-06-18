@@ -20,7 +20,7 @@ sub get_filename {
     my ( $self, $url ) = @_;
     my ( $tx, $dom, $headers, $form, $url2, $host, $wise, $file );
     my ( $at, $iss, $vid, $pass, $referer, $vid_server, $vid_link );
-    
+
     say "URL: $url" if $DEBUG;
     # set up url
     $url = $self->_set_url( $url );
@@ -28,37 +28,37 @@ sub get_filename {
 
     # get the first page
     $headers = { Referer => 'http://hqq.tv/' };
-    
+
     $self->ua->max_redirects(5);
     $tx = $self->ua->get( $url => $headers );
     $self->ua->max_redirects(0);
     return 0 unless $tx->success;
 
     $dom = encode 'UTF-8', $tx->res->dom;
-    
+
     # decode javascript
     ($wise) = $dom =~ /(;eval\(function\(w,i,s,e\)\{.+?\)\);)\s*</;
     return 0 unless $wise;
     $wise = unwise( $wise );
-    
+
     # extract vars from js
     $iss = $self->_get_ip;
-    ($vid) = $wise =~ /var vid *= *"([^"]+)";/;
-    ($at) = $wise =~ /var at *= *"([^"]+)";/;
-    ($referer) = $wise =~ /var http_referer *= *"([^"]+)";/;
+    ($vid) = $wise =~ /&vid=([^&]+)/;
+    ($at) = $wise =~ /&at=([^&]+)/;
+    ($referer) = $wise =~ /&http_referer=([^&]+)/;
     $referer||='';
     $pass = '';
-    
+
     # set up url
     $host = 'https://hqq.watch/';
     $url2 = $host.'sec/player/embed_player.php?iss='.$iss.'&vid='.$vid.'&at='.$at;
     $url2 .= '&autoplayed=yes&referer=on&http_referer='.$referer;
     $url2 .= '&pass='.$pass.'&embed_from=&need_captcha=0';
-    
+
     # get second page
     $tx = $self->ua->get( $url2 => $headers );
     return 0 unless $tx->success;
-    
+
     # decode the page
     $dom = unwise( $tx->res->dom );
     $dom = url_unescape( $dom );
@@ -72,9 +72,9 @@ sub get_filename {
     if ( $dom =~ / vid: "([a-zA-Z0-9]+)"}/ ) {
         $vid = $1;
     }
-    
+
     return 0 unless $at and $vid_server and $vid_link;
-    
+
     # set up headers and form for ajax get request
     $headers->{'X-Requested-With'} = 'XMLHttpRequest';
     $form = {
@@ -85,14 +85,14 @@ sub get_filename {
         b        => '1',
         vid      => $vid,
     };
-    
+
     # ajax get request
     $tx = $self->ua->get( $host.'/player/get_md5.php'
         => $headers
-        => form => $form 
+        => form => $form
     );
     return 0 unless $tx->success;
-    
+
     # parse json
     $dom = html_unescape( $tx->res->dom );
     $dom = decode_json($dom);
@@ -122,23 +122,23 @@ sub get_filename {
 
 sub _set_url {
     my ( $self, $url ) = @_;
-    
+
     my $id = $self->_get_id( $url );
     return 'http://hqq.tv/player/embed_player.php?vid='.$id.'&autoplay=no';
 }
 
 sub _get_id {
     my ( $self, $url ) = @_;
-    
+
     my ($id) = $url =~ /\?v.*?=(\w+)/;
-   
+
     return $id;
 }
 
 sub _get_ip {
     my $self = shift;
     my $ip = '192.168.';
-    
+
     $ip .= join('.', map{ int(rand(256)) } 1 .. 2 );
 
     return b64_encode($ip, '');
